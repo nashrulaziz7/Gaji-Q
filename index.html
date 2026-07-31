@@ -56,15 +56,16 @@
         .bg-stripe-green:nth-child(even) { background-color: #f0fdf4; }
         .bg-stripe-red:nth-child(even) { background-color: #fef2f2; }
 
+        .print-only-container { display: none; }
         @media print {
             @page { size: 330mm 215mm landscape; margin: 0; }
-            body, html { overflow: visible !important; height: auto !important; background: white !important; margin: 0 !important; padding: 0 !important; }
+            /* Memaksa HP untuk mengakui ukuran F4 (330mm) */
+            body, html { overflow: visible !important; height: auto !important; background: white !important; margin: 0 !important; padding: 0 !important; min-width: 330mm !important; }
             .no-print { display: none !important; }
-            .print-only-container { max-width: 100% !important; gap: 0 !important; }
-            .page-break { page-break-after: always; box-shadow: none !important; width: 330mm !important; height: 215mm !important; padding: 10mm !important; gap: 10mm !important; background: transparent !important; }
+            .print-only-container { display: flex !important; flex-direction: column !important; width: 330mm !important; gap: 0 !important; }
+            .page-break { page-break-after: always; box-shadow: none !important; width: 330mm !important; height: 215mm !important; padding: 10mm !important; gap: 10mm !important; background: transparent !important; margin: 0 !important; box-sizing: border-box !important; }
             * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
         }
-        .print-only { display: none; }
         
         /* Animasi Pop Up */
         @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
@@ -286,8 +287,8 @@
 
             useEffect(() => {
                 if (printQueue.users && printQueue.users.length > 0) {
-                    // Dipercepat menjadi 500ms agar lebih responsif
-                    const timer = setTimeout(() => window.print(), 500);
+                    // Beri jeda 800ms agar HP punya waktu merender gambar dengan sempurna sebelum print
+                    const timer = setTimeout(() => window.print(), 800);
                     
                     const afterPrint = () => setPrintQueue({ users: [], period: null });
                     window.addEventListener('afterprint', afterPrint);
@@ -327,7 +328,7 @@
                         </div>
                         
                         {/* Kertas F4 Sesungguhnya - Muncul HANYA di dalam PDF */}
-                        <div className="hidden print:flex flex-col gap-8 w-full max-w-[330mm]">
+                        <div className="print-only-container">
                             {chunks.map((chunk, pageIdx) => (
                                 <div key={pageIdx} className="page-break flex flex-row bg-white w-full h-[215mm] p-[10mm] gap-[10mm]" style={{ boxSizing: 'border-box' }}>
                                     {chunk.map((user, idx) => (
