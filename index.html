@@ -3,12 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Gaji•Q - SDIT Muhammadiyah Al Kautsar</title>
+    <title>Gaji•Q - SDIT Muh Al Kautsar</title>
     
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -22,6 +24,7 @@
         }
     </script>
 
+    <!-- React & ReactDOM -->
     <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -30,6 +33,7 @@
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f3f4f6; overflow: hidden; }
         
+        /* Scrollbar styles tipis */
         ::-webkit-scrollbar { width: 5px; height: 5px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 5px; }
@@ -43,7 +47,7 @@
         .sticky-col { position: sticky; left: 0; z-index: 10; }
         .sticky-cross { position: sticky; top: 0; left: 0; z-index: 30; }
         
-        select { appearance: none; background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e"); background-repeat: no-repeat; background-position: right 0.75rem center; background-size: 1em; padding-right: 2rem !important; }
+        select { appearance: none; background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e"); background-repeat: no-repeat; background-position: right 1rem center; background-size: 1em; }
         
         @keyframes subtle-pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.8; transform: scale(1.05); } }
         .sync-active { animation: subtle-pulse 1.5s infinite ease-in-out; }
@@ -53,14 +57,16 @@
         .bg-stripe-red:nth-child(even) { background-color: #fef2f2; }
 
         @media print {
-            body, html { overflow: visible !important; height: auto !important; background: white !important; }
+            @page { size: 330mm 215mm landscape; margin: 0; }
+            body, html { overflow: visible !important; height: auto !important; background: white !important; margin: 0 !important; padding: 0 !important; }
             .no-print { display: none !important; }
-            .print-only { display: block !important; }
-            .page-break { page-break-after: always; padding-top: 10px; }
+            .print-only-container { max-width: 100% !important; gap: 0 !important; }
+            .page-break { page-break-after: always; box-shadow: none !important; width: 330mm !important; height: 215mm !important; padding: 10mm !important; gap: 10mm !important; background: transparent !important; }
             * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
         }
         .print-only { display: none; }
         
+        /* Animasi Pop Up */
         @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
     </style>
 </head>
@@ -71,9 +77,27 @@
         const { useState, useEffect, useMemo, useRef } = React;
 
         // =====================================================================
-        // MASUKKAN URL GOOGLE APPS SCRIPT (GAS) KAMU DI BAWAH INI:
-        // =====================================================================
-        const GAS_URL = "https://script.google.com/macros/s/AKfycbxTr6qv3SJCK4XIePo_QXgi1Wd7YnOL67YMfUAQPcFYz3USPKv1K55-w1OJAlE2_SOo/exec"; 
+        const LOGO_URL = "https://raw.githubusercontent.com/nashrulaziz7/Gaji-Q/main/alkaspg.png";
+        const TTD_URL = "https://raw.githubusercontent.com/nashrulaziz7/Gaji-Q/main/ttd.png";
+        const KOP_ATAS_URL = "https://raw.githubusercontent.com/nashrulaziz7/Gaji-Q/main/kopatas.png";
+        const KOP_BAWAH_URL = "https://raw.githubusercontent.com/nashrulaziz7/Gaji-Q/main/kopbawah.png";
+        const ICON_LOGIN_URL = "https://raw.githubusercontent.com/nashrulaziz7/Gaji-Q/main/iconlogin.png";
+        const ICON_APP_URL = "https://raw.githubusercontent.com/nashrulaziz7/Gaji-Q/main/iconapp.png";
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbxTr6qv3SJCK4XIePo_QXgi1Wd7YnOL67YMfUAQPcFYz3USPKv1K55-w1OJAlE2_SOo/exec";
+
+        // Injeksi PWA (Progressive Web App) untuk Fitur Install Otomatis
+        const manifest = { name: "Gaji•Q", short_name: "Gaji•Q", start_url: ".", display: "standalone", background_color: "#f3f4f6", theme_color: "#2563eb", icons: [{ src: ICON_APP_URL, sizes: "512x512", type: "image/png", purpose: "any maskable" }] };
+        const manifestUrl = URL.createObjectURL(new Blob([JSON.stringify(manifest)], { type: 'application/json' }));
+        document.querySelector('head').insertAdjacentHTML('beforeend', `<link rel="manifest" href="${manifestUrl}"><link rel="icon" href="${ICON_APP_URL}"><link rel="apple-touch-icon" href="${ICON_APP_URL}">`);
+        
+        // Gunakan try-catch agar tidak error jika browser (atau canvas) memblokir blob ServiceWorker
+        try {
+            const swUrl = URL.createObjectURL(new Blob(["self.addEventListener('install', e => self.skipWaiting()); self.addEventListener('activate', e => e.waitUntil(clients.claim())); self.addEventListener('fetch', e => {});"], { type: 'application/javascript' }));
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register(swUrl).catch(e => console.log("PWA ServiceWorker terblokir aman."));
+            }
+        } catch(e) {}
+
         // =====================================================================
 
         const Icons = {
@@ -94,7 +118,8 @@
             CloudSync: () => <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/></svg>,
             Printer: () => <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/></svg>,
             Calendar: () => <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>,
-            ChevronDown: () => <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            ChevronDown: () => <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>,
+            DownloadCloud: () => <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="M12 12v9"/><path d="m8 17 4 4 4-4"/></svg>
         };
 
         const formatRpPlain = (num) => {
@@ -131,23 +156,8 @@
             return `${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}`;
         };
 
-        const formatPeriodUI = (periodKey) => {
-            if(!periodKey) return "-";
-            const [y, m] = periodKey.split('-');
-            const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
-            return `${months[parseInt(m, 10)-1]} ${y}`;
-        };
-
         const generateInitialData = () => {
-            const defaultPeriod = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
-            return [{ 
-                id: "1", nama: "Yustri Mindaryani M.Pd", kode: "A", status: "GTY", tmt: "2005-05-20", lamaBekerja: "21 tahun", tugasTambahan: "Wali Kelas", password: "123", isPasswordChanged: false, 
-                riwayatGaji: {
-                    [defaultPeriod]: {
-                        gajiPokok: 1088588, tunjKeluarga: 108858, tunjFungsionalGuru: 570000, tunjStruktural: 1700000, transport: 450000, tht: 150000, subsidiBos: 400000, tunjWaliKelas: 0, tunjKhusus: 0, tunjFungsionalKaryawan: 0, tunjIcp: 300000, koorProgram: 150000, tunjBuma: 15000, tunjLab: 0, potonganTht: 150000, potonganSosial: 15000, potonganDitahan: 100000, potonganStrukturalDitahan: 0, potonganBuma: 200000, potonganBpjsKes: 100000, potonganBpjsTk: 69071, potonganKkgPai: 0, pinjamanSekolah: 0 
-                    }
-                }
-            }];
+            return [{ id: "1", nama: "Yustri Mindaryani M.Pd", kode: "A", status: "GTY", tmt: "2005-05-20", lamaBekerja: "21 tahun", tugasTambahan: "Wali Kelas", password: "123", isPasswordChanged: false, riwayatGaji: { "2026-07": { gajiPokok: 1088588, tunjKeluarga: 108858, tunjFungsionalGuru: 570000, tunjStruktural: 1700000, transport: 450000, tht: 150000, subsidiBos: 400000, tunjWaliKelas: 0, tunjKhusus: 0, tunjFungsionalKaryawan: 0, tunjIcp: 300000, koorProgram: 150000, tunjBuma: 15000, tunjLab: 0, potonganTht: 150000, potonganSosial: 15000, potonganDitahan: 100000, potonganStrukturalDitahan: 0, potonganBuma: 200000, potonganBpjsKes: 100000, potonganBpjsTk: 69071, potonganKkgPai: 0, pinjamanSekolah: 0 } } }];
         };
 
         const CustomModal = ({ isOpen, title, message, type = 'alert', onConfirm, onCancel }) => {
@@ -179,9 +189,17 @@
             const [modal, setModal] = useState({ isOpen: false });
             const [isSyncing, setIsSyncing] = useState(false);
             
-            const [printQueue, setPrintQueue] = useState({ users: [], period: null });
+            const [printQueue, setPrintQueue] = useState([]);
+            const [deferredPrompt, setDeferredPrompt] = useState(null);
             
             const syncTimeout = useRef(null);
+
+            // Deteksi jika browser mengizinkan Install Aplikasi
+            useEffect(() => {
+                const handler = (e) => { e.preventDefault(); setDeferredPrompt(e); };
+                window.addEventListener('beforeinstallprompt', handler);
+                return () => window.removeEventListener('beforeinstallprompt', handler);
+            }, []);
 
             const showModal = (options) => {
                 setModal({ isOpen: true, title: options.title || 'Info', message: options.message, type: options.type || 'alert', 
@@ -190,7 +208,6 @@
                 });
             };
 
-            // Fungsi Kirim Data ke Cloud
             const syncToCloud = (dataToSync, manual = false) => {
                 if (!GAS_URL || GAS_URL.trim() === "") {
                     if (manual) showModal({ title: 'Gagal', message: 'URL GAS belum dimasukkan ke dalam kode HTML (Baris 89)!', type: 'danger' });
@@ -198,45 +215,44 @@
                 }
                 setIsSyncing(true);
                 clearTimeout(syncTimeout.current);
-                fetch(GAS_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(dataToSync) })
+                fetch(GAS_URL, { method: 'POST', body: JSON.stringify(dataToSync), mode: 'no-cors', headers: { 'Content-Type': 'text/plain' } })
                 .then(() => { 
                     syncTimeout.current = setTimeout(() => setIsSyncing(false), 1000); 
-                    if (manual) showModal({ title: 'Berhasil', message: 'Data berhasil dikirim & disinkronkan ke Google Sheet!', type: 'alert' });
+                    if(manual) showModal({ title: 'Sukses', message: 'Data berhasil dikirim ke Google Sheet!', type: 'alert' });
                 })
                 .catch(err => {
                     setIsSyncing(false);
-                    if (manual) showModal({ title: 'Gagal', message: 'Koneksi ke Cloud gagal.', type: 'danger' });
+                    if(manual) showModal({ title: 'Gagal', message: 'Koneksi ke Google Sheet terputus.', type: 'danger' });
                 });
             };
 
-            // Fungsi Tarik Data dari Cloud
             const fetchFromCloud = (manual = false) => {
                 if (!GAS_URL || GAS_URL.trim() === "") {
                     if (manual) showModal({ title: 'Gagal', message: 'URL GAS belum dimasukkan ke dalam kode HTML (Baris 89)!', type: 'danger' });
                     return;
                 }
                 setIsSyncing(true);
-                fetch(GAS_URL).then(res => res.json()).then(data => {
-                    if(data && data.length > 0) { 
+                fetch(GAS_URL)
+                .then(res => res.json())
+                .then(data => {
+                    if(data && Array.isArray(data) && data.length > 0) { 
                         setUsers(data); 
                         localStorage.setItem('gajiq_users', JSON.stringify(data)); 
-                        if (manual) showModal({ title: 'Berhasil', message: 'Data terbaru berhasil ditarik dari Google Sheet!', type: 'alert' });
+                        if(manual) showModal({ title: 'Berhasil', message: `Menarik ${data.length} data dari Cloud.`, type: 'alert' });
                     } else if (manual) {
-                        showModal({ title: 'Info', message: 'Data di Cloud saat ini masih kosong.', type: 'alert' });
+                        showModal({ title: 'Info', message: 'Tidak ada data valid yang ditemukan di Cloud.', type: 'alert' });
                     }
                     setIsSyncing(false);
-                }).catch(err => {
+                })
+                .catch(err => {
                     setIsSyncing(false);
-                    if (manual) showModal({ title: 'Gagal', message: 'Gagal menarik data dari Cloud.', type: 'danger' });
+                    if (manual) showModal({ title: 'Gagal', message: 'Gagal menarik data dari Google Sheet. Cek URL.', type: 'danger' });
                 });
             };
 
-            // Auto-tarik saat di halaman login awal
             useEffect(() => {
-                if(view === 'login') {
-                    fetchFromCloud(false);
-                }
-            }, [view]);
+                if(view === 'login') fetchFromCloud(false);
+            }, []);
 
             useEffect(() => { localStorage.setItem('gajiq_users', JSON.stringify(users)); }, [users]);
             useEffect(() => { localStorage.setItem('gajiq_admin', JSON.stringify(adminSettings)); }, [adminSettings]);
@@ -254,7 +270,7 @@
                         }
                     }
                 }
-            }, []);
+            }, [users]);
 
             const handleLogout = () => { setCurrentUser(null); setUserRole(null); setView('login'); localStorage.removeItem('gajiq_saved_login'); };
             const updateUser = (updatedUser) => { 
@@ -263,12 +279,8 @@
             };
             const replaceAllUsers = (newUsers) => { setUsers(newUsers); syncToCloud(newUsers); };
 
-            const handlePrintBatch = (usersToPrint, periodKeyToPrint) => {
-                setPrintQueue({ users: usersToPrint, period: periodKeyToPrint });
-                setTimeout(() => {
-                    window.print();
-                    setTimeout(() => setPrintQueue({ users: [], period: null }), 1000);
-                }, 500);
+            const handlePrintBatch = (usersToPrint) => {
+                setPrintQueue(usersToPrint); // Otomatis membuka layar Preview Cetak
             };
 
             const CloudIndicator = () => (
@@ -277,20 +289,36 @@
                 </div>
             );
 
-            if (printQueue && printQueue.users.length > 0) {
+            // Jika sedang mode Print Batch dari Admin (Buka Mode Preview F4 PDF)
+            if (printQueue && printQueue.length > 0) {
+                const chunks = [];
+                for (let i = 0; i < printQueue.length; i += 2) { chunks.push(printQueue.slice(i, i + 2)); }
+                
                 return (
-                    <div className="print-only w-full bg-white text-black">
-                        {printQueue.users.map((user, idx) => (
-                            <div key={idx} className="page-break w-full h-full max-w-[800px] mx-auto py-10">
-                                <StaticPrintSlip user={user} periodKey={printQueue.period} adminSettings={adminSettings} />
-                            </div>
-                        ))}
+                    <div className="w-full min-h-screen bg-slate-400 p-4 md:p-8 flex flex-col items-center overflow-y-auto" style={{ fontFamily: 'sans-serif' }}>
+                        <div className="fixed bottom-6 right-6 flex gap-3 z-50 no-print">
+                            <button onClick={() => setPrintQueue([])} className="px-5 py-3 bg-slate-800 text-white rounded-full font-bold shadow-2xl hover:bg-slate-700 transition">Tutup Preview</button>
+                            <button onClick={() => window.print()} className="px-6 py-3 bg-primary text-white rounded-full font-bold shadow-2xl hover:bg-primaryDark flex items-center gap-2 transition transform hover:scale-105"><Icons.Printer /> Cetak / Save PDF</button>
+                        </div>
+                        
+                        <div className="print-only-container flex flex-col gap-8 w-full max-w-[330mm]">
+                            {chunks.map((chunk, pageIdx) => (
+                                <div key={pageIdx} className="page-break flex flex-row bg-white shadow-2xl w-full h-[215mm] p-[10mm] gap-[10mm]" style={{ boxSizing: 'border-box' }}>
+                                    {chunk.map((user, idx) => (
+                                        <div key={idx} className="flex-1 h-full overflow-hidden border-r border-dashed border-gray-300 pr-[5mm] last:border-r-0 last:pr-0 pl-[5mm] first:pl-0" style={{ width: 'calc(50% - 5mm)' }}>
+                                            <StaticPrintSlip user={user} adminSettings={adminSettings} />
+                                        </div>
+                                    ))}
+                                    {chunk.length === 1 && <div className="flex-1 h-full" style={{ width: 'calc(50% - 5mm)' }}></div>}
+                                </div>
+                            ))}
+                        </div>
                     </div>
                 );
             }
 
             let content = null;
-            if (view === 'login') content = <Login setView={setView} setCurrentUser={setCurrentUser} setUserRole={setUserRole} users={users} adminSettings={adminSettings} />;
+            if (view === 'login') content = <Login setView={setView} setCurrentUser={setCurrentUser} setUserRole={setUserRole} users={users} adminSettings={adminSettings} deferredPrompt={deferredPrompt} setDeferredPrompt={setDeferredPrompt} />;
             if (view === 'force_password') content = <ForcePasswordChange currentUser={currentUser} setCurrentUser={setCurrentUser} updateUser={updateUser} setView={setView} />;
             if (view === 'dashboard' && userRole === 'gurkar') content = <GurKarSlip currentUser={currentUser} setView={setView} onLogout={handleLogout} wa={adminSettings.wa} showModal={showModal} />;
             if (view === 'admin' && userRole === 'admin') content = <AdminDashboard users={users} setUsers={replaceAllUsers} adminSettings={adminSettings} setAdminSettings={setAdminSettings} onLogout={handleLogout} showModal={showModal} isSyncing={isSyncing} onPrintBatch={handlePrintBatch} fetchFromCloud={fetchFromCloud} syncToCloud={syncToCloud} />;
@@ -299,7 +327,7 @@
             return <div className="no-print h-full w-full">{content}<CloudIndicator /><CustomModal {...modal} /></div>;
         };
 
-        const Login = ({ setView, setCurrentUser, setUserRole, users, adminSettings }) => {
+        const Login = ({ setView, setCurrentUser, setUserRole, users, adminSettings, deferredPrompt, setDeferredPrompt }) => {
             const [username, setUsername] = useState('');
             const [password, setPassword] = useState('');
             const [showPassword, setShowPassword] = useState(false);
@@ -307,14 +335,22 @@
             const [error, setError] = useState('');
             const [adminClicks, setAdminClicks] = useState(0);
             const [isAdminMode, setIsAdminMode] = useState(false);
+            
+            // State untuk Dropdown Custom
+            const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+            const [searchName, setSearchName] = useState('');
 
             const sortedUsers = useMemo(() => [...users].sort((a,b) => a.nama.localeCompare(b.nama)), [users]);
+            const filteredDropdownUsers = sortedUsers.filter(u => u.nama.toLowerCase().includes(searchName.toLowerCase()));
 
             const handleSecretClick = () => {
                 const clicks = adminClicks + 1;
                 setAdminClicks(clicks);
                 if (clicks >= 5) {
-                    setIsAdminMode(true); setUsername(adminSettings.username); setPassword(''); setError('');
+                    setIsAdminMode(true);
+                    setUsername(adminSettings.username); 
+                    setPassword('');
+                    setError('');
                 }
             };
 
@@ -337,6 +373,15 @@
                 }
             };
 
+            // Logika Eksekusi Install Aplikasi (PWA)
+            const installApp = async () => {
+                if (deferredPrompt) {
+                    deferredPrompt.prompt();
+                    const { outcome } = await deferredPrompt.userChoice;
+                    if (outcome === 'accepted') setDeferredPrompt(null);
+                }
+            };
+
             return (
                 <div className={`h-screen-dynamic w-full flex items-center justify-center p-4 transition-colors duration-500 ${isAdminMode ? 'bg-slate-900' : 'bg-gradient-to-br from-primary to-blue-400'}`}>
                     {!isAdminMode && (
@@ -347,31 +392,55 @@
                     )}
 
                     <div className={`relative w-full max-w-sm p-6 rounded-2xl shadow-2xl ${isAdminMode ? 'glass-dark text-white' : 'glass text-gray-800'}`}>
-                        <div className="text-center mb-6">
-                            <div className={`w-16 h-16 mx-auto rounded-2xl flex items-center justify-center shadow-lg mb-3 ${isAdminMode ? 'bg-slate-800' : 'bg-gradient-to-tr from-primary to-accent'}`}>
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" className="w-12 h-12 text-white fill-current">
-                                    <text x="14" y="62" fontSize="46" fontWeight="900" fontFamily="sans-serif">G</text>
-                                    <circle cx="50" cy="46" r="6" />
-                                    <text x="58" y="62" fontSize="46" fontWeight="900" fontFamily="sans-serif">Q</text>
-                                    <path d="M 25 72 Q 50 95 75 72" stroke="white" strokeWidth="6" fill="none" strokeLinecap="round" />
-                                </svg>
-                            </div>
-                            <h2 className="text-lg font-bold">{isAdminMode ? 'Login Administrator' : 'Portal Gaji•Q'}</h2>
-                            <p className={`text-[10px] mt-0.5 ${isAdminMode ? 'text-gray-400' : 'text-gray-500'}`}>SDIT Muhammadiyah Al Kautsar Gumpang</p>
+                        <div className="text-center mb-6 mt-2">
+                            {/* Logo dari GitHub (Diperbesar agar terlihat profesional) */}
+                            <img src={ICON_LOGIN_URL} alt="Gaji-Q Icon" className="w-56 sm:w-64 h-auto mx-auto drop-shadow-xl mb-4" onError={(e) => {e.target.style.display='none'}} />
+                            {isAdminMode && <h2 className="text-lg font-bold text-white mt-3">Login Administrator</h2>}
                         </div>
 
                         <form onSubmit={handleLogin} className="space-y-4">
                             <div>
                                 <label className="block text-xs font-semibold mb-1">{isAdminMode ? 'Username Admin' : 'Pilih Nama Anda'}</label>
                                 <div className="relative">
-                                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400"><Icons.User /></div>
+                                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400 z-10"><Icons.User /></div>
                                     {isAdminMode ? (
                                         <input type="text" value={username} readOnly className="w-full pl-9 pr-3 py-2.5 text-sm rounded-lg border bg-slate-800 border-slate-700 text-gray-400 cursor-not-allowed focus:outline-none" />
                                     ) : (
-                                        <select value={username} onChange={(e) => setUsername(e.target.value)} className="w-full pl-9 pr-8 py-2.5 text-sm rounded-lg border bg-white/70 border-gray-200 focus:outline-none focus:ring-2 focus:ring-accent transition-all text-gray-700 font-medium cursor-pointer" required>
-                                            <option value="" disabled>-- Klik & Cari Nama --</option>
-                                            {sortedUsers.map(u => <option key={u.id} value={u.nama}>{u.nama}</option>)}
-                                        </select>
+                                        <>
+                                            {/* Dropdown Modern Custom */}
+                                            <div onClick={() => setIsDropdownOpen(!isDropdownOpen)} className={`w-full pl-9 pr-8 py-2.5 text-sm rounded-lg border bg-white/90 backdrop-blur-sm border-gray-200 cursor-pointer flex items-center justify-between transition-all shadow-sm ${isDropdownOpen ? 'ring-2 ring-primary border-primary' : 'hover:border-gray-300'}`}>
+                                                <span className={username ? 'text-gray-800 font-bold truncate' : 'text-gray-500'}>{username || '-- Klik & Cari Nama --'}</span>
+                                                <Icons.ChevronDown />
+                                            </div>
+                                            
+                                            {isDropdownOpen && (
+                                                <>
+                                                    {/* Background layer untuk menutup dropdown saat klik di luar */}
+                                                    <div className="fixed inset-0 z-40" onClick={() => setIsDropdownOpen(false)}></div>
+                                                    
+                                                    <div className="absolute z-50 w-full mt-1.5 bg-white border border-blue-100 rounded-xl shadow-2xl max-h-[250px] flex flex-col overflow-hidden animate-[fadeIn_0.15s_ease-out]">
+                                                        {/* Kotak Pencarian di dalam Dropdown */}
+                                                        <div className="p-2 border-b border-gray-100 bg-slate-50/90 backdrop-blur-sm sticky top-0 z-10">
+                                                            <div className="relative">
+                                                                <div className="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none text-gray-400"><Icons.Search /></div>
+                                                                <input type="text" autoFocus placeholder="Ketik nama..." value={searchName} onChange={e => setSearchName(e.target.value)} className="w-full pl-8 pr-3 py-2 text-xs rounded-lg border border-gray-200 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary bg-white shadow-inner" />
+                                                            </div>
+                                                        </div>
+                                                        {/* Daftar Nama */}
+                                                        <div className="overflow-y-auto flex-1 relative z-0">
+                                                            {filteredDropdownUsers.length > 0 ? filteredDropdownUsers.map(u => (
+                                                                <div key={u.id} onClick={() => {setUsername(u.nama); setIsDropdownOpen(false); setSearchName('');}} className="px-3 py-2.5 hover:bg-blue-50 cursor-pointer transition-colors text-xs font-semibold text-gray-700 border-b border-gray-50 last:border-0 hover:text-primary flex items-center gap-2.5 group">
+                                                                    <div className="w-6 h-6 rounded-full bg-gradient-to-br from-blue-100 to-blue-200 flex items-center justify-center text-blue-700 font-extrabold flex-none shadow-sm group-hover:scale-110 transition-transform">{u.nama.charAt(0)}</div>
+                                                                    <span className="truncate">{u.nama}</span>
+                                                                </div>
+                                                            )) : (
+                                                                <div className="px-3 py-6 text-center text-xs text-gray-400 font-medium">Nama tidak ditemukan</div>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                </>
+                                            )}
+                                        </>
                                     )}
                                 </div>
                             </div>
@@ -379,7 +448,7 @@
                                 <label className="block text-xs font-semibold mb-1">Password</label>
                                 <div className="relative">
                                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400"><Icons.Lock /></div>
-                                    <input type={showPassword ? 'text' : 'password'} value={password} onChange={(e) => setPassword(e.target.value)} className={`w-full pl-9 pr-10 py-2.5 text-sm rounded-lg border focus:outline-none focus:ring-2 focus:ring-accent transition-all ${isAdminMode ? 'bg-slate-800 border-slate-700 text-white' : 'bg-white/70 border-gray-200'}`} placeholder={isAdminMode ? '••••••••' : 'Password Default: 123'} required />
+                                    <input type={showPassword ? 'text' : 'password'} value={password} onChange={(e) => setPassword(e.target.value)} className={`w-full pl-9 pr-10 py-2.5 text-sm rounded-lg border focus:outline-none focus:ring-2 focus:ring-accent transition-all ${isAdminMode ? 'bg-slate-800 border-slate-700 text-white' : 'bg-white/90 backdrop-blur-sm border-gray-200'}`} placeholder={isAdminMode ? '••••••••' : 'Password Default: 123'} required />
                                     <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-accent">{showPassword ? <Icons.EyeOff /> : <Icons.Eye />}</button>
                                 </div>
                             </div>
@@ -387,10 +456,18 @@
                                 <input id="remember" type="checkbox" checked={rememberMe} onChange={(e) => setRememberMe(e.target.checked)} className="w-3.5 h-3.5 text-accent border-gray-300 rounded focus:ring-accent" />
                                 <label htmlFor="remember" className={`ml-2 text-[10px] font-medium ${isAdminMode ? 'text-gray-300' : 'text-gray-600'}`}>Ingat saya</label>
                             </div>
-                            {error && <div className="text-red-500 text-[10px] font-bold bg-red-50/50 p-1.5 rounded text-center">{error}</div>}
-                            <button type="submit" className={`w-full py-2.5 rounded-lg text-sm font-bold text-white shadow-md transition-transform transform hover:scale-[1.02] active:scale-[0.98] ${isAdminMode ? 'bg-indigo-600 hover:bg-indigo-700' : 'bg-primary hover:bg-primaryDark'}`}>MASUK</button>
+
+                            {error && <div className="text-red-500 text-[10px] font-bold bg-red-50/80 backdrop-blur-sm p-1.5 rounded text-center border border-red-100">{error}</div>}
+                            <button type="submit" className={`w-full py-2.5 rounded-lg text-sm font-bold text-white shadow-lg transition-transform transform hover:scale-[1.02] active:scale-[0.98] ${isAdminMode ? 'bg-indigo-600 hover:bg-indigo-700' : 'bg-primary hover:bg-primaryDark'}`}>MASUK</button>
+                            
+                            {/* Tombol Install Aplikasi muncul otomatis jika browser mengizinkan */}
+                            {deferredPrompt && !isAdminMode && (
+                                <button type="button" onClick={installApp} className="w-full py-2.5 rounded-lg text-sm font-bold text-blue-700 bg-blue-50 border border-blue-200 mt-2 flex items-center justify-center gap-2 hover:bg-blue-100 transition shadow-sm">
+                                    <Icons.DownloadCloud /> Install Aplikasi (HP / Laptop)
+                                </button>
+                            )}
                         </form>
-                        <div className="absolute bottom-2 right-3 text-[9px] opacity-20 cursor-pointer" onClick={handleSecretClick}>v4.0.PRO</div>
+                        <div className="absolute bottom-2 right-3 text-[9px] opacity-20 cursor-pointer" onClick={handleSecretClick}>v2.0.ULTIMATE</div>
                     </div>
                 </div>
             );
@@ -400,7 +477,6 @@
             const [newPassword, setNewPassword] = useState('');
             const [confirmPassword, setConfirmPassword] = useState('');
             const [error, setError] = useState('');
-            
             const handleSubmit = (e) => {
                 e.preventDefault();
                 if (newPassword.length < 4) { setError('Minimal 4 karakter!'); return; }
@@ -411,7 +487,6 @@
                 if (saved && saved.username === currentUser.nama) localStorage.setItem('gajiq_saved_login', JSON.stringify({ ...saved, password: newPassword }));
                 setView('dashboard');
             };
-
             return (
                 <div className="h-screen-dynamic w-full flex items-center justify-center p-4 bg-gray-900 bg-opacity-95 text-white">
                     <div className="w-full max-w-sm glass-dark p-6 rounded-2xl shadow-2xl border-t-2 border-accent">
@@ -434,58 +509,72 @@
             );
         };
 
-        const SignatureSVG = () => (
-            <svg viewBox="0 0 200 60" className="w-24 md:w-32 mx-auto my-1 opacity-80" style={{ filter: 'drop-shadow(1px 1px 0px rgba(0,0,255,0.2))' }}>
-                <path d="M 20 40 C 30 10, 50 10, 60 40 S 70 20, 80 40 S 90 20, 100 40 S 110 20, 120 40 C 130 50, 140 20, 150 20 S 170 60, 180 30" fill="transparent" stroke="#1e3a8a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-                <path d="M 80 50 L 160 50" fill="transparent" stroke="#1e3a8a" strokeWidth="1.5" strokeLinecap="round" />
-            </svg>
-        );
-
         const GurKarSlip = ({ currentUser, setView, onLogout, wa, showModal }) => {
             const c = currentUser;
             const parseNum = (val) => parseFloat(val?.toString().replace(/[^0-9.-]+/g,"")) || 0;
 
             const [isBlurred, setIsBlurred] = useState(false);
-            const [selectedDate, setSelectedDate] = useState(new Date());
-            const [showPeriodModal, setShowPeriodModal] = useState(false);
-            const [tempYear, setTempYear] = useState(new Date().getFullYear());
-            const listMonths = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
-
-            useEffect(() => {
-                if (c && c.riwayatGaji) {
-                    const periods = Object.keys(c.riwayatGaji).sort().reverse();
-                    if (periods.length > 0) {
-                        const [y, m] = periods[0].split('-');
-                        setSelectedDate(new Date(parseInt(y), parseInt(m) - 1, 1));
-                        setTempYear(parseInt(y));
-                    }
-                }
+            
+            // Dapatkan daftar periode yang tersedia untuk user ini
+            const availablePeriods = useMemo(() => {
+                if(!c.riwayatGaji) return [];
+                return Object.keys(c.riwayatGaji).sort().reverse();
             }, [c]);
 
+            // Setup state periode
+            const [selectedPeriod, setSelectedPeriod] = useState(() => {
+                if (availablePeriods.length > 0) return availablePeriods[0];
+                const d = new Date();
+                return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+            });
+
+            const [showPeriodModal, setShowPeriodModal] = useState(false);
+            const [tempYear, setTempYear] = useState(() => {
+                if(selectedPeriod) return parseInt(selectedPeriod.split('-')[0], 10);
+                return new Date().getFullYear();
+            });
+            const listMonths = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+
+            // Anti Screenshot
             useEffect(() => {
                 const handleBlur = () => setIsBlurred(true);
                 const handleFocus = () => setIsBlurred(false);
                 const handleVisibility = () => document.hidden ? setIsBlurred(true) : setIsBlurred(false);
                 const handleKeyDown = (e) => {
                     if (e.key === 'PrintScreen' || (e.ctrlKey && (e.key === 'p' || e.key === 's' || e.key === 'c'))) {
-                        e.preventDefault(); setIsBlurred(true); setTimeout(() => setIsBlurred(false), 3000); 
+                        e.preventDefault();
+                        setIsBlurred(true);
+                        setTimeout(() => setIsBlurred(false), 3000); 
                     }
                 };
-                window.addEventListener('blur', handleBlur); window.addEventListener('focus', handleFocus);
-                document.addEventListener('visibilitychange', handleVisibility); document.addEventListener('keydown', handleKeyDown);
+                
+                window.addEventListener('blur', handleBlur);
+                window.addEventListener('focus', handleFocus);
+                document.addEventListener('visibilitychange', handleVisibility);
+                document.addEventListener('keydown', handleKeyDown);
+                
                 return () => {
-                    window.removeEventListener('blur', handleBlur); window.removeEventListener('focus', handleFocus);
-                    document.removeEventListener('visibilitychange', handleVisibility); document.removeEventListener('keydown', handleKeyDown);
+                    window.removeEventListener('blur', handleBlur);
+                    window.removeEventListener('focus', handleFocus);
+                    document.removeEventListener('visibilitychange', handleVisibility);
+                    document.removeEventListener('keydown', handleKeyDown);
                 }
             }, []);
 
             const handleSelectMonth = (index) => {
-                setSelectedDate(new Date(tempYear, index, 1));
+                const targetPeriod = `${tempYear}-${String(index + 1).padStart(2, '0')}`;
+                
+                // Cek ketersediaan data (Logika Warna Merah Lembut)
+                if(!availablePeriods.includes(targetPeriod)) {
+                    showModal({ title: 'Data Tidak Ditemukan', message: `Slip gaji untuk bulan ${listMonths[index]} ${tempYear} belum tersedia atau Anda tidak menerima gaji pada periode ini.`, type: 'alert' });
+                    return;
+                }
+                
+                setSelectedPeriod(targetPeriod);
                 setShowPeriodModal(false);
             };
 
-            const currentPeriodKeyStr = `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, '0')}`;
-            const activeSalary = (c.riwayatGaji && c.riwayatGaji[currentPeriodKeyStr]) ? c.riwayatGaji[currentPeriodKeyStr] : {};
+            const activeSalary = c.riwayatGaji?.[selectedPeriod] || {};
 
             const penerimaan = [
                 { label: 'Gaji Pokok', val: parseNum(activeSalary.gajiPokok) }, { label: 'Tunjangan Keluarga', val: parseNum(activeSalary.tunjKeluarga) },
@@ -509,7 +598,13 @@
             const totalPotongan = potongan.reduce((sum, item) => sum + item.val, 0);
             const gajiBersih = totalPenerimaan - totalPotongan;
 
-            const currentMonthStr = new Intl.DateTimeFormat('id-ID', { month: 'long', year: 'numeric' }).format(selectedDate);
+            const formatPeriodUI = (pk) => {
+                if(!pk) return "-";
+                const [y, m] = pk.split('-');
+                return `${listMonths[parseInt(m)-1]} ${y}`;
+            };
+            
+            const currentMonthStr = formatPeriodUI(selectedPeriod);
             const currentDateStr = new Intl.DateTimeFormat('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date());
 
             return (
@@ -524,15 +619,15 @@
                             </div>
 
                             <div className="flex items-start gap-2.5 md:gap-4 mb-2 md:mb-4 pr-32">
-                                <div className="w-11 h-11 md:w-14 md:h-14 bg-white rounded-lg flex items-center justify-center shadow-sm flex-none">
-                                    <div className="text-primary font-extrabold text-[12px] md:text-sm text-center leading-none">SDIT<br/>MAK</div>
+                                <div className="w-11 h-11 md:w-14 md:h-14 bg-white rounded-lg flex items-center justify-center shadow-sm flex-none p-1">
+                                    <img src={LOGO_URL} alt="Logo" className="w-full h-full object-contain" onError={(e) => e.target.style.display='none'} />
                                 </div>
                                 <div>
                                     <h1 className="font-bold text-[12px] md:text-base leading-tight tracking-wide">SDIT MUHAMMADIYAH AL KAUTSAR</h1>
                                     <p className="text-[10px] md:text-xs text-blue-200 tracking-wider">GUMPANG KARTASURA</p>
                                     
                                     <button 
-                                        onClick={() => { setTempYear(selectedDate.getFullYear()); setShowPeriodModal(true); }} 
+                                        onClick={() => { setTempYear(parseInt(selectedPeriod.split('-')[0], 10)); setShowPeriodModal(true); }} 
                                         className="mt-1.5 md:mt-2 inline-flex items-center gap-1.5 px-3 py-1 md:py-1.5 bg-gradient-to-r from-yellow-400 to-yellow-600 text-white rounded-full font-extrabold text-[9px] md:text-[11px] tracking-widest shadow-md border border-yellow-300/50 hover:scale-105 active:scale-95 transition-all cursor-pointer"
                                     >
                                         <Icons.Calendar /> SLIP {currentMonthStr.toUpperCase()} <Icons.ChevronDown />
@@ -544,10 +639,7 @@
                                 <div className="bg-blue-900/40 p-2.5 md:p-4 rounded-xl flex-1 border border-blue-700/50 shadow-inner flex flex-col justify-center">
                                     <div className="text-[10px] md:text-xs text-blue-200 mb-0.5">Diberikan Kepada:</div>
                                     <div className="font-bold text-sm md:text-lg truncate leading-tight text-white">{c.nama}</div>
-                                    <div className="text-[9px] md:text-[11px] text-blue-100 mt-1">
-                                        {c.status} • TMT: {formatTglIndo(c.tmt)}<br/>
-                                        <span className="text-blue-200">{c.tugasTambahan && <span>Tugas: {c.tugasTambahan} • </span>}Masa Kerja: {c.lamaBekerja || '-'}</span>
-                                    </div>
+                                    <div className="text-[9px] md:text-[11px] text-blue-100 mt-1">{c.status} • TMT: {formatTglIndo(c.tmt)}</div>
                                 </div>
                                 <div className="bg-gradient-to-br from-accent to-accentDark p-2.5 md:p-4 rounded-xl flex-1 flex flex-col justify-center items-end sm:items-end border border-orange-500/50 shadow-md">
                                     <div className="text-[10px] md:text-xs text-orange-100 mb-0.5">Total Terima Bersih</div>
@@ -560,10 +652,11 @@
                         </div>
 
                         <div className="flex-1 p-2 md:p-4 flex flex-col overflow-y-auto">
-                            {!c.riwayatGaji || !c.riwayatGaji[currentPeriodKeyStr] ? (
-                                <div className="flex-1 flex items-center justify-center flex-col text-gray-400 py-10">
+                            {totalPenerimaan === 0 && totalPotongan === 0 ? (
+                                <div className="flex-1 flex flex-col items-center justify-center text-slate-400 p-8 text-center">
                                     <Icons.AlertCircle />
-                                    <p className="mt-2 text-sm font-semibold">Data slip gaji bulan ini tidak tersedia.</p>
+                                    <p className="mt-4 font-bold">Data Gaji Belum Tersedia</p>
+                                    <p className="text-xs mt-1">Silakan pilih bulan lain melalui tombol kalender di atas.</p>
                                 </div>
                             ) : (
                                 <>
@@ -577,7 +670,6 @@
                                                         <span className="text-[11px] md:text-sm"><FormattedRp value={item.val} type="green" /></span>
                                                     </div>
                                                 ))}
-                                                {penerimaan.length === 0 && <div className="text-[9px] md:text-xs text-green-400 italic text-center py-1">Nihil</div>}
                                             </div>
                                             <div className="mt-2 pt-2 border-t border-green-200 flex justify-between items-center rounded-lg p-2 bg-green-100 shadow-inner-lg">
                                                 <span className="text-[10px] md:text-xs font-bold text-green-800">TOTAL</span>
@@ -604,22 +696,13 @@
                                     </div>
 
                                     <div className="bg-blue-50/60 border border-blue-100 p-3 md:p-4 rounded-xl text-[9px] md:text-xs leading-relaxed text-blue-900 mt-3 md:mt-4 shadow-sm">
-                                        <p className="font-bold mb-1 md:mb-2 text-[10px] md:text-sm text-blue-800">CATATAN:</p>
+                                        <p className="font-bold mb-1 md:mb-2 text-[10px] md:text-sm text-blue-800">CATATAN PENTING:</p>
                                         <ol className="list-decimal pl-4 space-y-1 text-justify">
                                             <li>Tabungan hari tua (DPLK) akan langsung disetorkan ke Bank Muamalat Oleh Bendahara, dan kepesertaannya ketika sudah 4 tahun Menjadi Guru/Karyawan Tetap.</li>
                                             <li>Dana Sosial ditarik setiap bulan sebesar Rp 15.000,- (lima belas ribu rupiah) untuk kegiatan sosial Guru dan Karyawan SDIT Muhammadiyah Al-Kautsar.</li>
                                             <li>Potongan BPJS Kesehatan ini diberlakukan bagi Bapak/Ibu karyawan yang menambahkan peserta tambahan, seperti orang tua dan/atau mertua, dalam kepesertaan BPJS Kesehatan.</li>
                                             <li>BPJS Ketenagakerjaan yang diikuti mencakup 4 program (JKK, JKM, JHT, dan JP), namun yang ditanggung oleh sekolah hanya 3 program awal (JKK, JKM, JHT).</li>
                                         </ol>
-                                    </div>
-
-                                    <div className="flex justify-end pr-4 md:pr-8 mt-6 mb-4 md:mt-8 md:mb-8 text-gray-800">
-                                        <div className="text-center text-[10px] md:text-sm">
-                                            <p>Surakarta, {currentDateStr}</p>
-                                            <p className="mb-1">Bendahara,</p>
-                                            <SignatureSVG />
-                                            <p className="font-bold underline tracking-wide">Nur Marlena, S. Kom</p>
-                                        </div>
                                     </div>
                                 </>
                             )}
@@ -648,25 +731,22 @@
                                         </div>
                                         <div className="grid grid-cols-3 gap-2">
                                             {listMonths.map((m, i) => {
-                                                const loopPeriodKey = `${tempYear}-${String(i + 1).padStart(2, '0')}`;
-                                                const hasData = c.riwayatGaji && c.riwayatGaji[loopPeriodKey] !== undefined;
-                                                const isCurrent = loopPeriodKey === currentPeriodKeyStr;
+                                                const iterPeriod = `${tempYear}-${String(i + 1).padStart(2, '0')}`;
+                                                const hasData = availablePeriods.includes(iterPeriod);
+                                                const isCurrent = iterPeriod === selectedPeriod;
                                                 
-                                                let btnClass = "py-2 rounded-xl text-xs font-bold transition-all ";
-                                                
-                                                if (!hasData) {
-                                                    btnClass += "bg-red-50/70 text-red-300 border border-red-100 cursor-not-allowed opacity-70";
-                                                } else if (isCurrent) {
-                                                    btnClass += "transform scale-105 bg-green-100 text-green-700 shadow-md border border-green-300";
+                                                let btnClass = "py-2 rounded-xl text-xs font-bold transition-all transform ";
+                                                if (isCurrent) {
+                                                    btnClass += "bg-accent text-white shadow-md border-accent scale-105";
+                                                } else if (hasData) {
+                                                    btnClass += "bg-white text-slate-600 border border-slate-200 hover:bg-green-50 hover:border-green-300 hover:text-green-600 hover:scale-105 active:scale-95";
                                                 } else {
-                                                    btnClass += "transform hover:scale-105 active:scale-95 bg-white text-slate-600 border border-slate-200 hover:bg-green-50 hover:border-green-200 hover:text-green-600";
+                                                    btnClass += "bg-red-50 text-red-300 border border-red-100 opacity-60 hover:bg-red-100 hover:text-red-500 cursor-not-allowed";
                                                 }
 
                                                 return (
                                                     <button 
-                                                        key={i} 
-                                                        onClick={() => hasData && handleSelectMonth(i)}
-                                                        disabled={!hasData}
+                                                        key={i} onClick={() => handleSelectMonth(i)}
                                                         className={btnClass}
                                                     >
                                                         {m.substring(0, 3)}
@@ -674,7 +754,7 @@
                                                 )
                                             })}
                                         </div>
-                                        <p className="text-center text-[9px] text-slate-400 mt-4">*Bulan berwarna merah artinya data slip tidak tersedia di database.</p>
+                                        <p className="text-center text-[9px] text-slate-400 mt-4">*Kotak merah menandakan data gaji tidak tersedia.</p>
                                     </div>
                                 </div>
                             </div>
@@ -710,98 +790,98 @@
             const totalPenerimaan = penerimaan.reduce((sum, item) => sum + item.val, 0);
             const totalPotongan = potongan.reduce((sum, item) => sum + item.val, 0);
             const gajiBersih = totalPenerimaan - totalPotongan;
-
-            const printMonthStr = formatPeriodUI(periodKey);
+            
+            const formatPeriodUI = (pk) => {
+                if(!pk) return "-";
+                const [y, m] = pk.split('-');
+                const months = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+                return `${months[parseInt(m)-1]} ${y}`;
+            };
+            const currentMonthStr = formatPeriodUI(periodKey);
             const currentDateStr = new Intl.DateTimeFormat('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date());
 
             return (
-                <div className="w-[100%] h-full flex flex-col bg-white border-2 border-gray-100 rounded-xl overflow-hidden p-6" style={{ fontFamily: 'sans-serif' }}>
-                    <div className="bg-blue-600 text-white p-5 flex-none flex flex-col justify-center rounded-xl relative" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>
-                        <div className="flex items-start gap-4 mb-4">
-                            <div className="w-14 h-14 bg-white rounded-lg flex items-center justify-center flex-none">
-                                <div className="text-blue-600 font-extrabold text-sm text-center leading-none">SDIT<br/>MAK</div>
-                            </div>
-                            <div>
-                                <h1 className="font-bold text-lg leading-tight tracking-wide">SDIT MUHAMMADIYAH AL KAUTSAR</h1>
-                                <p className="text-xs text-blue-200 tracking-wider">GUMPANG KARTASURA</p>
-                                <div className="mt-2 inline-block px-3 py-1 bg-yellow-500 text-white rounded-full font-extrabold text-xs tracking-widest border border-yellow-400">
-                                    SLIP {printMonthStr.toUpperCase()}
-                                </div>
-                            </div>
+                <div className="w-full h-full flex flex-col bg-white overflow-hidden relative" style={{ fontFamily: 'sans-serif' }}>
+                    
+                    {/* Kop Surat Atas dari GitHub */}
+                    <img src={KOP_ATAS_URL} alt="Kop Surat Atas" className="w-full h-auto object-contain flex-none" />
+                    
+                    <div className="px-5 py-2 flex-1 flex flex-col min-h-0 text-[10px]">
+                        <h2 className="text-center font-extrabold text-[12px] uppercase mb-3 underline underline-offset-2">Slip Gaji {currentMonthStr}</h2>
+                        
+                        {/* Info Pegawai dengan field tambahan */}
+                        <div className="grid grid-cols-2 gap-x-2 gap-y-1 mb-3 text-[9.5px]">
+                            <div className="flex"><span className="w-24 font-bold">Diberikan Kepada</span><span className="mr-1">:</span><span className="font-extrabold text-[10.5px]">{c.nama}</span></div>
+                            <div className="flex"><span className="w-24 font-bold">Lama Bekerja</span><span className="mr-1">:</span><span>{c.lamaBekerja || '-'}</span></div>
+                            <div className="flex"><span className="w-24 font-bold">Status / TMT</span><span className="mr-1">:</span><span>{c.status} ({formatTglIndo(c.tmt)})</span></div>
+                            <div className="flex"><span className="w-24 font-bold">Tugas Tambahan</span><span className="mr-1">:</span><span>{c.tugasTambahan || '-'}</span></div>
                         </div>
-                        <div className="flex gap-4">
-                            <div className="bg-blue-800 p-4 rounded-xl flex-1 border border-blue-700">
-                                <div className="text-xs text-blue-200 mb-1">Diberikan Kepada:</div>
-                                <div className="font-bold text-lg truncate leading-tight text-white">{c.nama}</div>
-                                <div className="text-xs text-blue-100 mt-1">
-                                    {c.status} • TMT: {formatTglIndo(c.tmt)}<br/>
-                                    {c.tugasTambahan && <span>Tugas: {c.tugasTambahan} • </span>}Masa Kerja: {c.lamaBekerja || '-'}
-                                </div>
-                            </div>
-                            <div className="bg-orange-500 p-4 rounded-xl flex-1 flex flex-col justify-center items-end border border-orange-400">
-                                <div className="text-xs text-orange-100 mb-1">Total Terima Bersih</div>
-                                <div className="font-extrabold text-2xl text-white flex items-baseline gap-1">
-                                    <span className="text-sm font-normal">Rp</span>
-                                    {formatRpPlain(gajiBersih)}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
 
-                    <div className="flex-1 mt-6 flex flex-col">
-                        <div className="grid grid-cols-2 gap-6 items-start">
-                            <div className="rounded-xl border border-green-200 p-3 flex flex-col">
-                                <div className="text-sm font-bold text-green-700 mb-2 border-b border-green-200 pb-1 uppercase bg-green-50 p-2 rounded-t-lg" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>Penerimaan</div>
-                                <div className="flex flex-col px-2">
+                        {/* Tabel Penerimaan & Potongan */}
+                        <div className="grid grid-cols-2 gap-3 flex-1 min-h-0">
+                            <div className="border border-gray-400 p-2 flex flex-col h-full rounded">
+                                <div className="font-bold border-b-2 border-gray-400 pb-1 mb-1 text-center bg-gray-100 uppercase" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>Penerimaan</div>
+                                <div className="flex-1 flex flex-col space-y-0.5 overflow-hidden pr-1">
                                     {penerimaan.map((item, idx) => (
-                                        <div key={idx} className="flex justify-between items-center py-1.5 border-b border-green-100 last:border-0">
-                                            <span className="text-xs text-green-800">{item.label}</span>
-                                            <span className="text-sm font-semibold">{formatRpPlain(item.val)}</span>
+                                        <div key={idx} className="flex justify-between items-center text-[9px] border-b border-gray-100 pb-0.5">
+                                            <span className="truncate pr-1">{item.label}</span>
+                                            <span className="font-medium whitespace-nowrap">{formatRpPlain(item.val)}</span>
                                         </div>
                                     ))}
                                 </div>
-                                <div className="mt-2 pt-2 border-t border-green-300 flex justify-between items-center rounded-lg p-2 bg-green-100" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>
-                                    <span className="text-xs font-bold text-green-800">TOTAL</span>
-                                    <span className="text-base font-bold text-green-900">{formatRpPlain(totalPenerimaan)}</span>
+                                <div className="mt-1 pt-1.5 border-t-2 border-gray-400 flex justify-between font-bold flex-none text-[10px] bg-gray-50 px-1 rounded" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>
+                                    <span>TOTAL PENERIMAAN</span>
+                                    <span>{formatRpPlain(totalPenerimaan)}</span>
                                 </div>
                             </div>
-
-                            <div className="rounded-xl border border-red-200 p-3 flex flex-col">
-                                <div className="text-sm font-bold text-red-700 mb-2 border-b border-red-200 pb-1 uppercase bg-red-50 p-2 rounded-t-lg" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>Potongan</div>
-                                <div className="flex flex-col px-2">
+                            
+                            <div className="border border-gray-400 p-2 flex flex-col h-full rounded">
+                                <div className="font-bold border-b-2 border-gray-400 pb-1 mb-1 text-center bg-gray-100 uppercase" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>Potongan</div>
+                                <div className="flex-1 flex flex-col space-y-0.5 overflow-hidden pr-1">
                                     {potongan.map((item, idx) => (
-                                        <div key={idx} className="flex justify-between items-center py-1.5 border-b border-red-100 last:border-0">
-                                            <span className="text-xs text-red-800">{item.label}</span>
-                                            <span className="text-sm font-semibold">{formatRpPlain(item.val)}</span>
+                                        <div key={idx} className="flex justify-between items-center text-[9px] border-b border-gray-100 pb-0.5">
+                                            <span className="truncate pr-1">{item.label}</span>
+                                            <span className="font-medium whitespace-nowrap">{formatRpPlain(item.val)}</span>
                                         </div>
                                     ))}
                                 </div>
-                                <div className="mt-2 pt-2 border-t border-red-300 flex justify-between items-center rounded-lg p-2 bg-red-100" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>
-                                    <span className="text-xs font-bold text-red-800">TOTAL</span>
-                                    <span className="text-base font-bold text-red-900">{formatRpPlain(totalPotongan)}</span>
+                                <div className="mt-1 pt-1.5 border-t-2 border-gray-400 flex justify-between font-bold flex-none text-[10px] bg-gray-50 px-1 rounded" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>
+                                    <span>TOTAL POTONGAN</span>
+                                    <span>{formatRpPlain(totalPotongan)}</span>
                                 </div>
                             </div>
                         </div>
 
-                        <div className="bg-blue-50 border border-blue-200 p-4 rounded-xl text-xs leading-relaxed text-blue-900 mt-6" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>
-                            <p className="font-bold mb-2 text-sm text-blue-800">CATATAN:</p>
-                            <ol className="list-decimal pl-5 space-y-1">
-                                <li>Tabungan hari tua (DPLK) akan langsung disetorkan ke Bank Muamalat Oleh Bendahara.</li>
-                                <li>Dana Sosial ditarik setiap bulan sebesar Rp 15.000,- (lima belas ribu rupiah).</li>
-                                <li>Potongan BPJS Kesehatan diberlakukan bagi karyawan yang menambahkan peserta tambahan.</li>
-                                <li>BPJS Ketenagakerjaan mencakup 4 program (JKK, JKM, JHT, dan JP).</li>
-                            </ol>
+                        {/* Total Bersih */}
+                        <div className="my-2.5 bg-gray-100 border border-gray-400 p-2 flex justify-between items-center flex-none rounded" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>
+                            <span className="font-bold uppercase text-[11px] tracking-wide">Total Diterima Bersih</span>
+                            <span className="font-extrabold text-[14px]">Rp {formatRpPlain(gajiBersih)}</span>
                         </div>
 
-                        <div className="flex justify-end pr-10 mt-10 text-gray-800">
-                            <div className="text-center text-sm">
-                                <p>Surakarta, {currentDateStr}</p>
-                                <p className="mb-1">Bendahara,</p>
-                                <SignatureSVG />
-                                <p className="font-bold underline tracking-wide mt-1">Nur Marlena, S. Kom</p>
+                        {/* Catatan & Tanda Tangan */}
+                        <div className="flex justify-between mt-1 flex-none items-end">
+                             <div className="text-[8px] max-w-[60%] leading-tight text-gray-700 bg-white p-1 rounded">
+                                <p className="font-bold underline mb-0.5">Catatan Penting:</p>
+                                <ol className="list-decimal pl-3 space-y-0.5">
+                                    <li>Tabungan hari tua (DPLK) disetorkan ke Bank Muamalat.</li>
+                                    <li>Dana Sosial ditarik Rp 15.000,- / bulan.</li>
+                                    <li>BPJS Ketenagakerjaan mencakup 4 program (JKK, JKM, JHT, JP).</li>
+                                </ol>
+                            </div>
+                            <div className="text-center w-40 mt-2">
+                                <p className="mb-0.5">Surakarta, {currentDateStr}</p>
+                                <p>Bendahara,</p>
+                                {/* Tanda Tangan SVG/Image Overlay */}
+                                <div className="h-10 relative my-0.5 flex justify-center">
+                                    <img src={TTD_URL} alt="TTD Bendahara" className="h-full object-contain mix-blend-multiply" />
+                                </div>
+                                <p className="font-bold underline tracking-wide">Nur Marlena, S. Kom</p>
                             </div>
                         </div>
                     </div>
+                    
+                    {/* Kop Surat Bawah dari GitHub */}
+                    <img src={KOP_BAWAH_URL} alt="Kop Surat Bawah" className="w-full h-auto object-contain flex-none mt-auto" />
                 </div>
             );
         };
@@ -812,7 +892,6 @@
             const [editingUser, setEditingUser] = useState(null);
             const [selectedForPrint, setSelectedForPrint] = useState([]);
 
-            // Ambil semua periode yang ada untuk filter dropdown
             const allPeriods = useMemo(() => {
                 const periods = new Set();
                 users.forEach(u => {
@@ -830,11 +909,6 @@
                     setSelectedAdminPeriod(allPeriods[0]);
                 }
             }, [allPeriods, selectedAdminPeriod]);
-
-            // Auto-Tarik data dari GAS saat halaman Admin Panel terbuka
-            useEffect(() => {
-                fetchFromCloud(false);
-            }, []);
 
             const filteredUsers = users.filter(u => u.nama.toLowerCase().includes(searchTerm.toLowerCase()));
 
@@ -855,11 +929,26 @@
             };
 
             const parseNum = (val) => parseFloat(val?.toString().replace(/[^0-9.-]+/g,"")) || 0;
-            const getTotalPenerimaan = (u) => parseNum(u.gajiPokok) + parseNum(u.tunjKeluarga) + parseNum(u.tunjFungsionalGuru) + parseNum(u.tunjFungsionalKaryawan) + parseNum(u.tunjKhusus) + parseNum(u.tunjStruktural) + parseNum(u.tunjWaliKelas) + parseNum(u.transport) + parseNum(u.tht) + parseNum(u.subsidiBos) + parseNum(u.tunjIcp) + parseNum(u.koorProgram) + parseNum(u.tunjBuma) + parseNum(u.tunjLab);
-            const getTotalPotongan = (u) => parseNum(u.potonganTht) + parseNum(u.potonganSosial) + parseNum(u.potonganDitahan) + parseNum(u.potonganStrukturalDitahan) + parseNum(u.potonganBuma) + parseNum(u.potonganBpjsKes) + parseNum(u.potonganBpjsTk) + parseNum(u.potonganKkgPai) + parseNum(u.pinjamanSekolah);
+            
+            const getSal = (u) => u.riwayatGaji?.[selectedAdminPeriod] || {};
+            const getTotalPenerimaan = (u) => {
+                const s = getSal(u);
+                return parseNum(s.gajiPokok) + parseNum(s.tunjKeluarga) + parseNum(s.tunjFungsionalGuru) + parseNum(s.tunjFungsionalKaryawan) + parseNum(s.tunjKhusus) + parseNum(s.tunjStruktural) + parseNum(s.tunjWaliKelas) + parseNum(s.transport) + parseNum(s.tht) + parseNum(s.subsidiBos) + parseNum(s.tunjIcp) + parseNum(s.koorProgram) + parseNum(s.tunjBuma) + parseNum(s.tunjLab);
+            };
+            const getTotalPotongan = (u) => {
+                const s = getSal(u);
+                return parseNum(s.potonganTht) + parseNum(s.potonganSosial) + parseNum(s.potonganDitahan) + parseNum(s.potonganStrukturalDitahan) + parseNum(s.potonganBuma) + parseNum(s.potonganBpjsKes) + parseNum(s.potonganBpjsTk) + parseNum(s.potonganKkgPai) + parseNum(s.pinjamanSekolah);
+            };
+
+            const formatPeriodUI = (pk) => {
+                if(!pk) return "-";
+                const [y, m] = pk.split('-');
+                const months = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+                return `${months[parseInt(m)-1]} ${y}`;
+            };
 
             return (
-                <div className="min-h-screen bg-slate-50 flex flex-col text-gray-800 text-sm relative">
+                <div className="h-screen bg-slate-50 flex flex-col text-gray-800 text-sm relative">
                     <div className="bg-slate-900 text-white p-3 flex justify-between items-center shadow-md sticky top-0 z-40">
                         <div>
                             <h1 className="font-bold text-sm flex items-center gap-2">
@@ -868,15 +957,15 @@
                             </h1>
                             <p className="text-[10px] text-slate-400">{users.length} Data Tersimpan</p>
                         </div>
-                        <div className="flex gap-1.5 md:gap-2">
-                            <button onClick={() => fetchFromCloud(true)} className="px-2.5 py-1.5 bg-blue-500/20 text-blue-300 rounded text-[11px] font-bold flex items-center gap-1 hover:bg-blue-500/40 transition">
-                                <Icons.CloudSync /> <span className="hidden md:inline">Tarik Data</span>
+                        <div className="flex items-center gap-2">
+                            <button onClick={() => fetchFromCloud(true)} className="px-3 py-1.5 bg-indigo-600 text-white rounded text-[10px] font-bold flex items-center gap-1 hover:bg-indigo-700 transition">
+                                <Icons.DownloadCloud /> Tarik Data
                             </button>
-                            <button onClick={() => syncToCloud(users, true)} className="px-2.5 py-1.5 bg-green-500/20 text-green-300 rounded text-[11px] font-bold flex items-center gap-1 hover:bg-green-500/40 transition">
-                                <Icons.Upload /> <span className="hidden md:inline">Kirim Data</span>
+                            <button onClick={() => syncToCloud(users, true)} className="px-3 py-1.5 bg-green-600 text-white rounded text-[10px] font-bold flex items-center gap-1 hover:bg-green-700 transition">
+                                <Icons.CloudSync /> Kirim Data
                             </button>
-                            <button onClick={onLogout} className="px-2.5 py-1.5 bg-red-500/20 text-red-300 rounded text-[11px] font-bold flex items-center gap-1 hover:bg-red-500/40 transition">
-                                <Icons.LogOut /> <span className="hidden md:inline">Keluar</span>
+                            <button onClick={onLogout} className="px-2.5 py-1.5 bg-red-500/20 text-red-300 rounded text-[10px] font-bold flex items-center gap-1 hover:bg-red-500/40 transition border border-red-500/50">
+                                <Icons.LogOut /> Keluar
                             </button>
                         </div>
                     </div>
@@ -887,24 +976,26 @@
                         <button onClick={() => setActiveTab('settings')} className={`flex-1 py-2 font-semibold border-b-2 transition ${activeTab==='settings' ? 'border-primary text-primary bg-blue-50/50' : 'border-transparent text-gray-500 hover:bg-gray-50'}`}>Pengaturan Admin</button>
                     </div>
 
-                    <div className="flex-1 p-3 overflow-hidden flex flex-col">
+                    <div className="flex-1 p-3 overflow-hidden flex flex-col min-h-0">
                         {activeTab === 'data' && (
-                            <div className="flex flex-col h-full gap-3 max-w-full">
+                            <div className="flex flex-col h-full gap-3 max-w-full min-h-0">
                                 <div className="flex gap-2 flex-none items-center flex-wrap">
                                     <div className="relative flex-1 min-w-[150px]">
                                         <div className="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none text-gray-400"><Icons.Search /></div>
                                         <input type="text" placeholder="Cari nama..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-full pl-8 pr-3 py-1.5 text-xs border rounded-md focus:ring-1 focus:ring-primary outline-none" />
                                     </div>
-                                    <div className="flex-none bg-blue-50 p-0.5 rounded-md border border-blue-100 flex items-center gap-1 px-1">
-                                        <span className="text-[10px] font-bold text-blue-800 ml-1">Periode:</span>
-                                        <select value={selectedAdminPeriod} onChange={(e) => setSelectedAdminPeriod(e.target.value)} className="text-[11px] font-bold text-blue-900 bg-transparent border-none py-1 focus:ring-0 outline-none cursor-pointer">
+                                    
+                                    <div className="flex items-center gap-1.5 bg-blue-50 border border-blue-200 rounded-md px-2 py-1">
+                                        <span className="text-[10px] font-bold text-blue-800">Periode:</span>
+                                        <select value={selectedAdminPeriod} onChange={e => setSelectedAdminPeriod(e.target.value)} className="bg-transparent text-xs font-bold text-primary outline-none cursor-pointer pr-4">
                                             {allPeriods.map(p => <option key={p} value={p}>{formatPeriodUI(p)}</option>)}
                                         </select>
                                     </div>
+
                                     <button onClick={executePrint} className="bg-indigo-600 text-white px-3 py-1.5 rounded-md text-xs font-bold hover:bg-indigo-700 flex items-center gap-1.5 flex-none shadow-sm transition">
                                         <Icons.Printer /> Cetak ({selectedForPrint.length})
                                     </button>
-                                    <button onClick={() => setEditingUser({})} className="bg-primary text-white px-3 py-1.5 rounded-md text-xs font-bold hover:bg-primaryDark flex-none shadow-sm transition">+ Tambah</button>
+                                    <button onClick={() => setEditingUser({ riwayatGaji: {} })} className="bg-primary text-white px-3 py-1.5 rounded-md text-xs font-bold hover:bg-primaryDark flex-none shadow-sm transition">+ Tambah</button>
                                 </div>
                                 <div className="flex-1 bg-white rounded-lg shadow border overflow-auto relative text-[10px] min-h-0">
                                     <table className="w-full whitespace-nowrap text-left border-collapse">
@@ -917,24 +1008,24 @@
                                                 <th className="sticky-cross p-2 border-b border-r min-w-[150px] left-[60px] bg-slate-200">Nama Lengkap (Klik)</th>
                                                 <th className="sticky-header p-2 border-b min-w-[60px] bg-slate-200">Status</th>
                                                 <th className="sticky-header p-2 border-b min-w-[60px] bg-slate-200">TMT</th>
-                                                <th className="sticky-header p-2 border-b min-w-[80px] bg-slate-200">Masa Kerja</th>
+                                                <th className="sticky-header p-2 border-b min-w-[100px] bg-slate-200">Lama Bekerja</th>
                                                 <th className="sticky-header p-2 border-b min-w-[100px] bg-slate-200">Tugas Tambahan</th>
                                                 <th className="sticky-header p-2 border-b min-w-[80px] bg-slate-200">Password</th>
                                                 <th className="sticky-header p-2 border-b text-right text-green-800 bg-green-100 font-extrabold">Gaji Bersih</th>
                                                 <th className="sticky-header p-2 border-b border-l bg-blue-100 text-blue-800 font-extrabold">Gaji Pokok</th>
-                                                <th className="sticky-header p-2 border-b bg-blue-100 text-blue-800 font-extrabold">Tunjangan Keluarga</th>
-                                                <th className="sticky-header p-2 border-b bg-blue-100 text-blue-800 font-extrabold">Tunjangan Fungsional Guru</th>
-                                                <th className="sticky-header p-2 border-b bg-blue-100 text-blue-800 font-extrabold">Tunjangan Fungsional Karyawan</th>
-                                                <th className="sticky-header p-2 border-b bg-blue-100 text-blue-800 font-extrabold">Tunjangan Khusus</th>
-                                                <th className="sticky-header p-2 border-b bg-blue-100 text-blue-800 font-extrabold">Tunjangan Struktural</th>
-                                                <th className="sticky-header p-2 border-b bg-blue-100 text-blue-800 font-extrabold">Tunjangan Wali Kelas</th>
+                                                <th className="sticky-header p-2 border-b bg-blue-100 text-blue-800 font-extrabold">Tunj. Keluarga</th>
+                                                <th className="sticky-header p-2 border-b bg-blue-100 text-blue-800 font-extrabold">Tunj. Fungsional Guru</th>
+                                                <th className="sticky-header p-2 border-b bg-blue-100 text-blue-800 font-extrabold">Tunj. Fungsional Kar</th>
+                                                <th className="sticky-header p-2 border-b bg-blue-100 text-blue-800 font-extrabold">Tunj. Khusus</th>
+                                                <th className="sticky-header p-2 border-b bg-blue-100 text-blue-800 font-extrabold">Tunj. Struktural</th>
+                                                <th className="sticky-header p-2 border-b bg-blue-100 text-blue-800 font-extrabold">Tunj. Wali Kelas</th>
                                                 <th className="sticky-header p-2 border-b bg-blue-100 text-blue-800 font-extrabold">Transport</th>
                                                 <th className="sticky-header p-2 border-b bg-blue-100 text-blue-800 font-extrabold">Tabungan Hari Tua</th>
                                                 <th className="sticky-header p-2 border-b bg-blue-100 text-blue-800 font-extrabold">Subsidi BOS</th>
                                                 <th className="sticky-header p-2 border-b bg-blue-100 text-blue-800 font-extrabold">Tugas Tambahan ICP</th>
                                                 <th className="sticky-header p-2 border-b bg-blue-100 text-blue-800 font-extrabold">Koordinator Program</th>
                                                 <th className="sticky-header p-2 border-b bg-blue-100 text-blue-800 font-extrabold">Tugas Tambahan BUMA</th>
-                                                <th className="sticky-header p-2 border-b bg-blue-100 text-blue-800 font-extrabold">Tunjangan Laboratorium</th>
+                                                <th className="sticky-header p-2 border-b bg-blue-100 text-blue-800 font-extrabold">Tunj. Laboratorium</th>
                                                 <th className="sticky-header p-2 border-b border-r bg-blue-200 font-extrabold text-blue-900">Total Penerimaan</th>
                                                 <th className="sticky-header p-2 border-b bg-red-100 text-red-800 font-extrabold">Potongan THT</th>
                                                 <th className="sticky-header p-2 border-b bg-red-100 text-red-800 font-extrabold">Dana Sosial</th>
@@ -951,40 +1042,46 @@
                                         </thead>
                                         <tbody className="divide-y divide-gray-100">
                                             {filteredUsers.map((u, i) => {
-                                                const salary = u.riwayatGaji?.[selectedAdminPeriod] || {};
-                                                const p = getTotalPenerimaan(salary); const m = getTotalPotongan(salary); const b = p - m;
-                                                const hasData = Object.keys(salary).length > 0;
+                                                const sal = getSal(u);
+                                                const p = getTotalPenerimaan(u); const m = getTotalPotongan(u); const b = p - m;
                                                 return (
-                                                <tr key={u.id || i} className={`hover:bg-slate-50 transition group ${hasData ? 'bg-stripe-blue' : 'bg-red-50/30'}`}>
-                                                    <td className={`sticky-col p-2 border-r group-hover:bg-slate-50 text-center ${hasData ? 'bg-white group-[.bg-stripe-blue]:bg-slate-50' : 'bg-red-50'}`}>
+                                                <tr key={u.id || i} className="hover:bg-slate-50 transition group bg-stripe-blue">
+                                                    <td className="sticky-col p-2 border-r bg-white group-hover:bg-slate-50 group-[.bg-stripe-blue]:bg-slate-50 text-center">
                                                         <input type="checkbox" checked={selectedForPrint.includes(u.id)} onChange={(e) => handleSelectOne(e, u.id)} className="w-3 h-3 cursor-pointer" />
                                                     </td>
-                                                    <td className={`sticky-col p-2 border-r left-[30px] group-hover:bg-slate-50 text-center text-gray-400 ${hasData ? 'bg-white group-[.bg-stripe-blue]:bg-slate-50' : 'bg-red-50'}`}>{i+1}</td>
-                                                    <td className={`sticky-col p-2 border-r left-[60px] group-hover:bg-slate-50 font-bold cursor-pointer hover:underline ${hasData ? 'bg-white group-[.bg-stripe-blue]:bg-slate-50 text-primary' : 'bg-red-50 text-red-600'}`} onClick={() => setEditingUser(u)}>{u.nama} <Icons.Edit /></td>
+                                                    <td className="sticky-col p-2 border-r left-[30px] bg-white group-hover:bg-slate-50 group-[.bg-stripe-blue]:bg-slate-50 text-center text-gray-400">{i+1}</td>
+                                                    <td className="sticky-col p-2 border-r left-[60px] bg-white group-hover:bg-slate-50 group-[.bg-stripe-blue]:bg-slate-50 font-bold text-primary cursor-pointer hover:underline" onClick={() => setEditingUser(u)}>{u.nama} <Icons.Edit /></td>
                                                     <td className="p-2">{u.status}</td>
                                                     <td className="p-2">{formatTglIndo(u.tmt)}</td>
                                                     <td className="p-2">{u.lamaBekerja}</td>
                                                     <td className="p-2">{u.tugasTambahan}</td>
                                                     <td className="p-2 text-center text-[9px]">{u.isPasswordChanged ? <span className="text-green-600 bg-green-100 px-1 rounded">Ubah Sendiri</span> : <span className="text-orange-600 bg-orange-100 px-1 rounded">{u.password}</span>}</td>
                                                     <td className="p-2 text-right font-bold text-green-600 bg-green-50/50">Rp{formatRpPlain(b)}</td>
-                                                    <td className="p-2 border-l">{formatRpPlain(salary.gajiPokok)}</td><td className="p-2">{formatRpPlain(salary.tunjKeluarga)}</td><td className="p-2">{formatRpPlain(salary.tunjFungsionalGuru)}</td><td className="p-2">{formatRpPlain(salary.tunjFungsionalKaryawan)}</td><td className="p-2">{formatRpPlain(salary.tunjKhusus)}</td><td className="p-2">{formatRpPlain(salary.tunjStruktural)}</td><td className="p-2">{formatRpPlain(salary.tunjWaliKelas)}</td><td className="p-2">{formatRpPlain(salary.transport)}</td><td className="p-2">{formatRpPlain(salary.tht)}</td><td className="p-2">{formatRpPlain(salary.subsidiBos)}</td><td className="p-2">{formatRpPlain(salary.tunjIcp)}</td><td className="p-2">{formatRpPlain(salary.koorProgram)}</td><td className="p-2">{formatRpPlain(salary.tunjBuma)}</td><td className="p-2">{formatRpPlain(salary.tunjLab)}</td><td className="p-2 border-r bg-blue-100/80 font-bold">{formatRpPlain(p)}</td>
-                                                    <td className="p-2">{formatRpPlain(salary.potonganTht)}</td><td className="p-2">{formatRpPlain(salary.potonganSosial)}</td><td className="p-2">{formatRpPlain(salary.potonganDitahan)}</td><td className="p-2">{formatRpPlain(salary.potonganStrukturalDitahan)}</td><td className="p-2">{formatRpPlain(salary.potonganBuma)}</td><td className="p-2">{formatRpPlain(salary.potonganBpjsKes)}</td><td className="p-2">{formatRpPlain(salary.potonganBpjsTk)}</td><td className="p-2">{formatRpPlain(salary.potonganKkgPai)}</td><td className="p-2">{formatRpPlain(salary.pinjamanSekolah)}</td><td className="p-2 bg-red-100/80 font-bold">{formatRpPlain(m)}</td>
-                                                    <td className="p-2 text-center"><button onClick={() => showModal({title: 'Hapus Data', message: 'Yakin hapus SEMUA data guru ini?', type: 'confirm', onConfirm: () => { const n = users.filter(x => x.id !== u.id); setUsers(n); }})} className="p-1 bg-red-50 text-red-600 rounded hover:bg-red-100"><Icons.Trash /></button></td>
+                                                    <td className="p-2 border-l">{formatRpPlain(sal.gajiPokok)}</td><td className="p-2">{formatRpPlain(sal.tunjKeluarga)}</td><td className="p-2">{formatRpPlain(sal.tunjFungsionalGuru)}</td><td className="p-2">{formatRpPlain(sal.tunjFungsionalKaryawan)}</td><td className="p-2">{formatRpPlain(sal.tunjKhusus)}</td><td className="p-2">{formatRpPlain(sal.tunjStruktural)}</td><td className="p-2">{formatRpPlain(sal.tunjWaliKelas)}</td><td className="p-2">{formatRpPlain(sal.transport)}</td><td className="p-2">{formatRpPlain(sal.tht)}</td><td className="p-2">{formatRpPlain(sal.subsidiBos)}</td><td className="p-2">{formatRpPlain(sal.tunjIcp)}</td><td className="p-2">{formatRpPlain(sal.koorProgram)}</td><td className="p-2">{formatRpPlain(sal.tunjBuma)}</td><td className="p-2">{formatRpPlain(sal.tunjLab)}</td><td className="p-2 border-r bg-blue-100/80 font-bold">{formatRpPlain(p)}</td>
+                                                    <td className="p-2">{formatRpPlain(sal.potonganTht)}</td><td className="p-2">{formatRpPlain(sal.potonganSosial)}</td><td className="p-2">{formatRpPlain(sal.potonganDitahan)}</td><td className="p-2">{formatRpPlain(sal.potonganStrukturalDitahan)}</td><td className="p-2">{formatRpPlain(sal.potonganBuma)}</td><td className="p-2">{formatRpPlain(sal.potonganBpjsKes)}</td><td className="p-2">{formatRpPlain(sal.potonganBpjsTk)}</td><td className="p-2">{formatRpPlain(sal.potonganKkgPai)}</td><td className="p-2">{formatRpPlain(sal.pinjamanSekolah)}</td><td className="p-2 bg-red-100/80 font-bold">{formatRpPlain(m)}</td>
+                                                    <td className="p-2 text-center"><button onClick={() => showModal({title: 'Hapus Data', message: 'Yakin hapus data ini?', type: 'confirm', onConfirm: () => { const n = users.filter(x => x.id !== u.id); setUsers(n); syncToCloud(n); }})} className="p-1 bg-red-50 text-red-600 rounded hover:bg-red-100"><Icons.Trash /></button></td>
                                                 </tr>
                                             )})}
                                         </tbody>
                                     </table>
                                 </div>
-                                <div className="text-right flex-none"><button onClick={() => showModal({ title: 'BAHAYA!', message: 'Yakin hapus semua data?', type:'danger', onConfirm: ()=>setUsers([])})} className="text-[10px] text-red-500 font-bold hover:underline">Reset Total Data</button></div>
+                                <div className="text-right flex-none"><button onClick={() => showModal({ title: 'BAHAYA!', message: 'Yakin hapus semua data?', type:'danger', onConfirm: ()=>{setUsers([]); syncToCloud([]);}})} className="text-[10px] text-red-500 font-bold hover:underline">Reset Total Data</button></div>
                             </div>
                         )}
 
-                        {activeTab === 'upload' && <UploadTab users={users} setUsers={setUsers} setActiveTab={setActiveTab} showModal={showModal} />}
+                        {activeTab === 'upload' && <UploadTab users={users} setUsers={setUsers} setActiveTab={setActiveTab} showModal={showModal} syncToCloud={syncToCloud} />}
 
                         {activeTab === 'settings' && (
                             <div className="max-w-sm mx-auto bg-white p-5 rounded-xl shadow-sm border mt-4 text-xs">
-                                <h2 className="font-bold mb-4 text-slate-800 flex items-center gap-2"><Icons.CloudSync /> Pengaturan Admin</h2>
+                                <h2 className="font-bold mb-4 text-slate-800 flex items-center gap-2"><Icons.CloudSync /> Pengaturan Akun Admin</h2>
                                 <form onSubmit={(e) => { e.preventDefault(); showModal({title:'Berhasil', message:'Pengaturan disimpan.', type:'alert'}); }} className="space-y-4">
+                                    <div className="p-3 bg-blue-50 rounded-lg border border-blue-100">
+                                        <p className="text-[10px] text-blue-700 font-bold mb-1">Status Sinkronisasi Cloud:</p>
+                                        <div className="flex items-center gap-2">
+                                            <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+                                            <span className="text-xs text-green-700 font-bold">AKTIF & TERHUBUNG</span>
+                                        </div>
+                                    </div>
                                     <div>
                                         <label className="block font-bold text-gray-500 mb-1">Username Admin</label>
                                         <input type="text" value={adminSettings.username} onChange={(e) => setAdminSettings({...adminSettings, username: e.target.value})} className="w-full px-2 py-1.5 border rounded focus:ring-1 focus:ring-primary outline-none" />
@@ -1005,32 +1102,26 @@
 
                     {editingUser && (
                         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-3 z-50 no-print">
-                            <div className="bg-white rounded-xl w-full max-w-2xl max-h-[95vh] flex flex-col shadow-2xl">
+                            <div className="bg-white rounded-xl w-full max-w-lg max-h-[95vh] flex flex-col shadow-2xl">
                                 <div className="p-3 border-b flex justify-between items-center bg-slate-50 rounded-t-xl">
-                                    <h2 className="font-bold text-sm text-primary">{editingUser.id ? `Edit Data (${formatPeriodUI(selectedAdminPeriod)})` : `Tambah Data (${formatPeriodUI(selectedAdminPeriod)})`}</h2>
+                                    <h2 className="font-bold text-sm text-primary">{editingUser.id ? 'Edit Data & Profil' : 'Tambah Data'}</h2>
                                     <button onClick={() => setEditingUser(null)} className="text-gray-400 hover:text-black font-bold text-xl leading-none">&times;</button>
                                 </div>
-                                <div className="p-4 overflow-y-auto flex-1 text-xs">
+                                <div className="p-3 overflow-y-auto flex-1 text-xs">
                                     <UserForm 
                                         user={editingUser} 
-                                        currentPeriod={selectedAdminPeriod}
-                                        onSave={(formData) => {
-                                            const { id, nama, status, tmt, lamaBekerja, tugasTambahan, password, isPasswordChanged, ...salaryData } = formData;
+                                        selectedAdminPeriod={selectedAdminPeriod}
+                                        onSave={(updated) => {
                                             let n;
-                                            if (editingUser.id) { 
-                                                n = users.map(u => {
-                                                    if(u.id === editingUser.id) {
-                                                        const updatedRiwayat = { ...(u.riwayatGaji || {}), [selectedAdminPeriod]: salaryData };
-                                                        return { ...u, nama, status, tmt, lamaBekerja, tugasTambahan, password, isPasswordChanged, riwayatGaji: updatedRiwayat };
-                                                    }
-                                                    return u;
-                                                });
-                                            } else {
-                                                const newId = Date.now().toString();
-                                                const newUser = { id: newId, nama, status, tmt, lamaBekerja, tugasTambahan, password: password || '123', isPasswordChanged: isPasswordChanged || false, riwayatGaji: { [selectedAdminPeriod]: salaryData } };
-                                                n = [...users, newUser];
+                                            if (updated.id) { n = users.map(u => u.id === updated.id ? updated : u); } 
+                                            else {
+                                                updated.id = Date.now().toString();
+                                                if(!updated.password) updated.password = '123';
+                                                if(updated.isPasswordChanged === undefined) updated.isPasswordChanged = false;
+                                                n = [...users, updated];
                                             }
                                             setUsers(n);
+                                            syncToCloud(n);
                                             setEditingUser(null);
                                         }} 
                                     />
@@ -1042,19 +1133,27 @@
             );
         };
 
-        const UploadTab = ({ users, setUsers, setActiveTab, showModal }) => {
-            const [preview, setPreview] = useState({});
+        const UploadTab = ({ users, setUsers, setActiveTab, showModal, syncToCloud }) => {
+            const [preview, setPreview] = useState([]);
             const [isParsing, setIsParsing] = useState(false);
+            const [detectedPeriods, setDetectedPeriods] = useState([]);
 
-            const parseSheetName = (name) => {
-                const match = name.match(/^(Januari|Februari|Maret|April|Mei|Juni|Juli|Agustus|September|Oktober|November|Desember)\s+(\d{2}|\d{4})$/i);
-                if(!match) return null;
-                const mStr = match[1].toLowerCase();
-                const mArr = ['januari', 'februari', 'maret', 'april', 'mei', 'juni', 'juli', 'agustus', 'september', 'oktober', 'november', 'desember'];
-                const mIdx = mArr.indexOf(mStr) + 1;
-                let year = parseInt(match[2], 10);
-                if(year < 100) year += 2000;
-                return `${year}-${String(mIdx).padStart(2, '0')}`;
+            const getMonthNum = (monthStr) => {
+                const months = ["jan", "feb", "mar", "apr", "mei", "jun", "jul", "agu", "sep", "okt", "nov", "des"];
+                const str = monthStr.toLowerCase().substring(0, 3);
+                const idx = months.indexOf(str);
+                return idx >= 0 ? String(idx + 1).padStart(2, '0') : "01";
+            };
+
+            const parsePeriodFromSheetName = (name) => {
+                const parts = name.trim().split(/\s+/);
+                if (parts.length >= 2) {
+                    const m = getMonthNum(parts[0]);
+                    let yStr = parts[1];
+                    if (yStr.length === 2) yStr = "20" + yStr;
+                    return `${yStr}-${m}`;
+                }
+                return null;
             };
 
             const handleFileUpload = (e) => {
@@ -1066,162 +1165,127 @@
                         try {
                             const data = new Uint8Array(evt.target.result);
                             const wb = XLSX.read(data, { type: 'array' });
-                            processData(wb);
-                        } catch (error) {
-                            showModal({ title: 'Gagal', message: 'File tidak terbaca.', type: 'danger' });
-                            setIsParsing(false);
+                            
+                            let extractedData = {};
+                            let periodsFound = [];
+
+                            wb.SheetNames.forEach(sheetName => {
+                                const periodKey = parsePeriodFromSheetName(sheetName);
+                                if (!periodKey) return; 
+                                
+                                periodsFound.push({ original: sheetName, key: periodKey });
+                                const ws = wb.Sheets[sheetName];
+                                const jsonData = XLSX.utils.sheet_to_json(ws, { defval: "", raw: false });
+                                
+                                jsonData.forEach((row, idx) => {
+                                    const nama = row['Nama'] || row['NAMA'] || row['Nama Lengkap'] || '';
+                                    if (!nama || nama === 'Tanpa Nama') return;
+
+                                    if (!extractedData[nama]) {
+                                        extractedData[nama] = {
+                                            id: (row['No Urut'] || row['No'] || Date.now() + Math.random()).toString(),
+                                            nama: nama,
+                                            kode: row['Kode'] || '', status: row['Status'] || row['STATUS'] || '', tmt: row['TMT Pertama'] || row['TMT'] || '',
+                                            lamaBekerja: row['Lama Bekerja'] || row['LAMA BEKERJA'] || '',
+                                            tugasTambahan: row['Tugas Tambahan'] || row['TUGAS TAMBAHAN'] || '',
+                                            password: row['Password'] || '123', isPasswordChanged: false,
+                                            riwayatGaji: {}
+                                        };
+                                    }
+
+                                    const getNum = (keyCandidates) => {
+                                        for(let key of keyCandidates) {
+                                            if(row[key] !== undefined && row[key] !== "") return parseFloat(row[key].toString().replace(/[^0-9.-]+/g,"")) || 0;
+                                        } return 0;
+                                    };
+
+                                    extractedData[nama].riwayatGaji[periodKey] = {
+                                        gajiPokok: getNum(['Gaji Pokok', 'GAJI POKOK']), tunjKeluarga: getNum(['Tunjangan Keluarga', 'TUNJ. KELUARGA']), tunjFungsionalGuru: getNum(['Tunjangan Fungsional Guru']), tunjFungsionalKaryawan: getNum(['Tunjangan Fungsional Karyawan']), tunjKhusus: getNum(['Tunjangan Khusus & Keahlian', 'Tunjangan Khusus']), tunjStruktural: getNum(['Tunjangan Struktural']), tunjWaliKelas: getNum(['Tunjangan Wali Kelas']), transport: getNum(['Transport', 'TRANSPORT']), tht: getNum(['Tabungan Hari Tua (Penerimaan)', 'Tabungan Hari Tua', 'THT']), subsidiBos: getNum(['Subsidi Gaji dari BOS', 'Subsidi BOS']), tunjIcp: getNum(['Tugas Tambahan ICP']), koorProgram: getNum(['KOOR. PROGRAM', 'Koordinator Program']), tunjBuma: getNum(['Tugas Tambahan BUMA']), tunjLab: getNum(['TUNJ. LAB', 'Tunjangan Lab', 'Tunjangan Laboratorium']),
+                                        potonganTht: getNum(['Tabungan Hari Tua (Potongan)', 'Potongan THT', 'Tabungan Hari Tua']), potonganSosial: getNum(['Dana Sosial']), potonganDitahan: getNum(['Gaji yang Ditahan']), potonganStrukturalDitahan: getNum(['Tunjangan Struktural Yang Ditahan', 'Struktural Ditahan']), potonganBuma: getNum(['Tabungan BUMA']), potonganBpjsKes: getNum(['Peserta Tambahan BPJS Kesehatan', 'BPJS Kesehatan']), potonganBpjsTk: getNum(['BPJS TK', 'BPJS Ketenagakerjaan']), potonganKkgPai: getNum(['IURAN KKG PAI', 'Iuran KKG PAI']), pinjamanSekolah: getNum(['Pinjaman Sekolah'])
+                                    };
+                                });
+                            });
+
+                            if (periodsFound.length === 0) {
+                                showModal({ title: 'Format Salah', message: 'Nama Sheet di Excel wajib format "Bulan Tahun" (Contoh: Juli 26, Agustus 2026).', type: 'danger' });
+                                setIsParsing(false);
+                                return;
+                            }
+                            
+                            setDetectedPeriods(periodsFound);
+                            setPreview(Object.values(extractedData));
+                        } catch (error) { 
+                            showModal({ title: 'Gagal', message: 'File tidak terbaca.', type: 'danger' }); 
                         }
+                        setIsParsing(false);
                     };
                     reader.readAsArrayBuffer(file);
                 }
             };
 
-            const processData = (wb) => {
-                const parsedData = {};
-                let foundMatch = false;
-
-                wb.SheetNames.forEach(sheetName => {
-                    const periodKey = parseSheetName(sheetName);
-                    if(periodKey) {
-                        foundMatch = true;
-                        const ws = wb.Sheets[sheetName];
-                        const jsonData = XLSX.utils.sheet_to_json(ws, { defval: "", raw: false }); 
-                        
-                        const getField = (row, candidates) => {
-                            const rowKeys = Object.keys(row);
-                            for(let cand of candidates) {
-                                const matched = rowKeys.find(rk => rk.trim().toLowerCase() === cand.trim().toLowerCase());
-                                if(matched && row[matched] !== undefined && row[matched] !== "") return row[matched];
-                            }
-                            return '';
-                        };
-                        const getNum = (row, keyCandidates) => {
-                            const val = getField(row, keyCandidates);
-                            if(val !== '') return parseFloat(val.toString().replace(/[^0-9.-]+/g,"")) || 0;
-                            return 0;
-                        };
-
-                        const mapped = jsonData.map((row, idx) => {
-                            return {
-                                id: (getField(row, ['No Urut', 'No', 'ID']) || (Date.now() + idx)).toString(),
-                                nama: getField(row, ['Nama', 'NAMA', 'Nama Lengkap']) || 'Tanpa Nama',
-                                profile: {
-                                    kode: getField(row, ['Kode', 'KODE']), 
-                                    status: getField(row, ['Status', 'STATUS']), 
-                                    tmt: getField(row, ['TMT Pertama', 'TMT', 'TMT PERTAMA']), 
-                                    lamaBekerja: getField(row, ['Lama Bekerja', 'LAMA BEKERJA']),
-                                    tugasTambahan: getField(row, ['Tugas Tambahan', 'TUGAS TAMBAHAN']),
-                                    password: getField(row, ['Password', 'Sandi']) || '123'
-                                },
-                                salary: {
-                                    gajiPokok: getNum(row, ['Gaji Pokok', 'GAJI POKOK']), 
-                                    tunjKeluarga: getNum(row, ['Tunjangan Keluarga', 'TUNJ. KELUARGA']), 
-                                    tunjFungsionalGuru: getNum(row, ['Tunjangan Fungsional Guru', 'Tunj. Fung Guru']), 
-                                    tunjFungsionalKaryawan: getNum(row, ['Tunjangan Fungsional Karyawan', 'Tunj. Fung Kar']), 
-                                    tunjKhusus: getNum(row, ['Tunjangan Khusus & Keahlian', 'Tunjangan Khusus', 'Tunj. Khusus']), 
-                                    tunjStruktural: getNum(row, ['Tunjangan Struktural', 'Tunj. Struktural']), 
-                                    tunjWaliKelas: getNum(row, ['Tunjangan Wali Kelas', 'Tunj. Wali Kelas']), 
-                                    transport: getNum(row, ['Transport', 'TRANSPORT']), 
-                                    tht: getNum(row, ['Tabungan Hari Tua (Penerimaan)', 'Tabungan Hari Tua', 'THT']), 
-                                    subsidiBos: getNum(row, ['Subsidi Gaji dari BOS', 'Subsidi BOS', 'SUB. BOS']), 
-                                    tunjIcp: getNum(row, ['Tugas Tambahan ICP', 'Tunj. ICP', 'TGS ICP']), 
-                                    koorProgram: getNum(row, ['KOOR. PROGRAM', 'Koordinator Program', 'Koor Program']), 
-                                    tunjBuma: getNum(row, ['Tugas Tambahan BUMA', 'Tunj. BUMA', 'TGS BUMA']), 
-                                    tunjLab: getNum(row, ['TUNJ. LAB', 'Tunjangan Lab', 'Tunjangan Laboratorium']),
-                                    potonganTht: getNum(row, ['Tabungan Hari Tua (Potongan)', 'Potongan THT', 'Tabungan Hari Tua', 'Pot THT']), 
-                                    potonganSosial: getNum(row, ['Dana Sosial', 'POTONGAN SOSIAL']), 
-                                    potonganDitahan: getNum(row, ['Gaji yang Ditahan', 'Gaji Ditahan']), 
-                                    potonganStrukturalDitahan: getNum(row, ['Tunjangan Struktural Yang Ditahan', 'Struktural Ditahan', 'Struk Ditahan']), 
-                                    potonganBuma: getNum(row, ['Tabungan BUMA', 'Tab BUMA']), 
-                                    potonganBpjsKes: getNum(row, ['Peserta Tambahan BPJS Kesehatan', 'BPJS Kesehatan', 'BPJS KES']), 
-                                    potonganBpjsTk: getNum(row, ['BPJS TK', 'BPJS Ketenagakerjaan']), 
-                                    potonganKkgPai: getNum(row, ['IURAN KKG PAI', 'KKG PAI']), 
-                                    pinjamanSekolah: getNum(row, ['Pinjaman Sekolah', 'PINJ. SEKOLAH'])
-                                }
-                            };
-                        });
-                        const validData = mapped.filter(u => u.nama !== 'Tanpa Nama' && u.nama.toLowerCase() !== 'nama');
-                        if(validData.length > 0) parsedData[periodKey] = validData;
-                    }
-                });
-
-                if(!foundMatch) {
-                    showModal({ title: 'Gagal Membaca Periode', message: 'Tidak ditemukan sheet bernama periode (misal: "Juli 26" atau "Agustus 2026").', type: 'danger' });
-                } else {
-                    setPreview(parsedData);
-                }
-                setIsParsing(false);
-            };
-
             const handleSaveImport = () => {
-                if(Object.keys(preview).length === 0) return;
-                let totalData = 0;
-                Object.values(preview).forEach(arr => totalData += arr.length);
-                
+                if(preview.length === 0) return;
                 showModal({
                     title: 'Simpan ke Sistem & Cloud',
-                    message: `Simpan ${totalData} data dari ${Object.keys(preview).length} periode bulan? Data akan digabungkan dengan riwayat sebelumnya.`,
+                    message: `Menyimpan data untuk ${detectedPeriods.length} bulan. Data akan disinkronkan ke Cloud otomatis.`,
                     type: 'confirm',
                     onConfirm: () => {
                         let updatedUsers = [...users];
-                        Object.keys(preview).forEach(periodKey => {
-                            preview[periodKey].forEach(newU => {
-                                const idx = updatedUsers.findIndex(u => u.nama.toLowerCase() === newU.nama.toLowerCase());
-                                if(idx >= 0) {
-                                    updatedUsers[idx].riwayatGaji = { ...(updatedUsers[idx].riwayatGaji || {}), [periodKey]: newU.salary };
-                                    if(newU.profile.status) updatedUsers[idx].status = newU.profile.status;
-                                    if(newU.profile.tmt) updatedUsers[idx].tmt = newU.profile.tmt;
-                                    if(newU.profile.lamaBekerja) updatedUsers[idx].lamaBekerja = newU.profile.lamaBekerja;
-                                    if(newU.profile.tugasTambahan) updatedUsers[idx].tugasTambahan = newU.profile.tugasTambahan;
-                                } else {
-                                    updatedUsers.push({
-                                        id: newU.id, nama: newU.nama, password: newU.profile.password, isPasswordChanged: false,
-                                        status: newU.profile.status, tmt: newU.profile.tmt, 
-                                        lamaBekerja: newU.profile.lamaBekerja, tugasTambahan: newU.profile.tugasTambahan,
-                                        riwayatGaji: { [periodKey]: newU.salary }
-                                    });
-                                }
-                            });
+                        preview.forEach(newU => {
+                            const idx = updatedUsers.findIndex(u => u.nama === newU.nama);
+                            if(idx >= 0) {
+                                newU.password = updatedUsers[idx].password;
+                                newU.isPasswordChanged = updatedUsers[idx].isPasswordChanged;
+                                updatedUsers[idx].riwayatGaji = { ...updatedUsers[idx].riwayatGaji, ...newU.riwayatGaji };
+                                updatedUsers[idx].lamaBekerja = newU.lamaBekerja || updatedUsers[idx].lamaBekerja;
+                                updatedUsers[idx].tugasTambahan = newU.tugasTambahan || updatedUsers[idx].tugasTambahan;
+                            } else {
+                                updatedUsers.push(newU);
+                            }
                         });
                         setUsers(updatedUsers); 
+                        syncToCloud(updatedUsers, false);
                         setTimeout(() => { setActiveTab('data'); }, 100);
                     }
                 });
             };
 
             return (
-                <div className="max-w-3xl mx-auto flex flex-col gap-4 h-full">
+                <div className="max-w-3xl mx-auto flex flex-col gap-4 h-full w-full">
                     <div className="bg-white p-4 rounded-xl shadow-sm border flex-none">
                         <h2 className="font-bold text-sm mb-2 text-green-600 flex items-center gap-2"><Icons.Excel /> Upload .xlsx (Multi-Sheet)</h2>
-                        <input type="file" accept=".xlsx, .xls" onChange={handleFileUpload} className="w-full text-xs border p-1.5 rounded cursor-pointer file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-xs file:font-bold file:bg-green-50 file:text-green-700" />
-                        <p className="text-[10px] text-gray-500 mt-2">*Nama Sheet di Excel wajib format Bulan Tahun, contoh: <strong>Juli 26</strong> atau <strong>Agustus 2026</strong> agar bisa terbaca otomatis.</p>
+                        <input type="file" accept=".xlsx, .xls" onChange={handleFileUpload} className="w-full text-xs border p-1.5 rounded cursor-pointer file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-xs file:font-bold file:bg-green-50 file:text-green-700 mb-2" />
+                        <p className="text-[10px] text-gray-500">*Nama Sheet di Excel wajib format Bulan Tahun, contoh: <b>Juli 26</b> atau <b>Agustus 2026</b> agar bisa terbaca otomatis.</p>
                     </div>
-                    {Object.keys(preview).length > 0 && (
+                    {preview.length > 0 && (
                         <div className="bg-white p-4 rounded-xl shadow-sm border flex-1 flex flex-col min-h-[200px]">
-                            <div className="flex justify-between items-center mb-3 flex-none">
+                            <div className="flex justify-between items-center mb-4 flex-none border-b pb-3">
                                 <h2 className="font-bold text-sm text-blue-600 flex items-center gap-1"><Icons.Check /> Data Ditemukan di Excel</h2>
                                 <button onClick={handleSaveImport} className="bg-blue-600 text-white px-3 py-1.5 rounded text-xs font-bold shadow hover:bg-blue-700 flex items-center gap-1"><Icons.CloudSync /> SIMPAN & SINKRONKAN</button>
                             </div>
-                            <div className="overflow-auto flex-1 text-[10px]">
-                                {Object.entries(preview).map(([period, dataArr]) => (
-                                    <div key={period} className="mb-4 border rounded overflow-hidden">
-                                        <h3 className="font-bold text-xs bg-slate-200 p-2 text-slate-800 flex justify-between">
-                                            <span>Periode: {formatPeriodUI(period)}</span>
-                                            <span className="text-primary">{dataArr.length} Data</span>
-                                        </h3>
-                                        <table className="w-full text-left whitespace-nowrap bg-slate-50">
-                                            <thead>
-                                                <tr className="border-b bg-white"><th className="p-2 w-10">No</th><th className="p-2">Nama</th><th className="p-2">G.Pokok</th><th className="p-2">Tunj.Keluarga</th></tr>
-                                            </thead>
-                                            <tbody className="divide-y">
-                                                {dataArr.slice(0,5).map((p,i) => (
-                                                    <tr key={i}><td className="p-2 text-gray-400">{i+1}</td><td className="p-2 font-bold">{p.nama}</td><td className="p-2 text-green-600">{formatRpPlain(p.salary.gajiPokok)}</td><td className="p-2">{formatRpPlain(p.salary.tunjKeluarga)}</td></tr>
-                                                ))}
-                                                {dataArr.length > 5 && <tr><td colSpan="4" className="p-2 text-center italic text-gray-400">... {dataArr.length - 5} data lainnya ...</td></tr>}
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                ))}
+                            <div className="overflow-auto flex-1 text-[10px] flex flex-col gap-4">
+                                {detectedPeriods.map((dp, i) => {
+                                    const usersInPeriod = preview.filter(u => u.riwayatGaji[dp.key]);
+                                    return (
+                                        <div key={i} className="border rounded-lg overflow-hidden flex-none">
+                                            <div className="bg-slate-100 p-2 font-bold text-slate-700 flex justify-between">
+                                                <span>Periode: {dp.original}</span>
+                                                <span className="text-blue-600">{usersInPeriod.length} Data</span>
+                                            </div>
+                                            <table className="w-full text-left whitespace-nowrap bg-white">
+                                                <thead className="bg-slate-50 border-b">
+                                                    <tr><th className="p-2 w-10">No</th><th className="p-2">Nama</th><th className="p-2">G.Pokok</th><th className="p-2">Tunj.Keluarga</th></tr>
+                                                </thead>
+                                                <tbody className="divide-y">
+                                                    {usersInPeriod.slice(0,5).map((p,idx) => (
+                                                        <tr key={idx}><td className="p-2 text-gray-400">{idx+1}</td><td className="p-2 font-bold">{p.nama}</td><td className="p-2 text-green-600">{formatRpPlain(p.riwayatGaji[dp.key].gajiPokok)}</td><td className="p-2">{formatRpPlain(p.riwayatGaji[dp.key].tunjKeluarga)}</td></tr>
+                                                    ))}
+                                                    {usersInPeriod.length > 5 && <tr><td colSpan="4" className="p-2 text-center text-gray-400 italic bg-slate-50">... {usersInPeriod.length - 5} data lainnya ...</td></tr>}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    )
+                                })}
                             </div>
                         </div>
                     )}
@@ -1229,46 +1293,64 @@
             );
         };
 
-        const UserForm = ({ user, currentPeriod, onSave }) => {
+        const UserForm = ({ user, selectedAdminPeriod, onSave }) => {
             const [formData, setFormData] = useState(() => { 
-                const salaryData = user.riwayatGaji?.[currentPeriod] || {};
-                let init = { ...user, ...salaryData }; 
+                let init = { ...user }; 
                 if(!init.password) init.password = '123'; 
-                if(init.isPasswordChanged === undefined) init.isPasswordChanged = false; 
+                if(init.isPasswordChanged === undefined) init.isPasswordChanged = false;
+                if(!init.riwayatGaji) init.riwayatGaji = {};
+                if(!init.riwayatGaji[selectedAdminPeriod]) init.riwayatGaji[selectedAdminPeriod] = {};
                 return init; 
             });
             const handleChange = (e) => { const { name, value, type, checked } = e.target; setFormData(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value })); };
+            const handleSalaryChange = (e) => {
+                const { name, value } = e.target;
+                setFormData(prev => ({
+                    ...prev,
+                    riwayatGaji: {
+                        ...prev.riwayatGaji,
+                        [selectedAdminPeriod]: {
+                            ...prev.riwayatGaji[selectedAdminPeriod],
+                            [name]: value
+                        }
+                    }
+                }));
+            };
+            
+            const sal = formData.riwayatGaji[selectedAdminPeriod];
             const inputClass = "w-full border px-2 py-1.5 rounded focus:ring-1 focus:ring-primary outline-none transition";
-            const numInput = (label, name) => (<div className="flex flex-col"><label className="text-[9px] font-bold text-gray-500 mb-0.5">{label}</label><input type="number" name={name} value={formData[name] || ''} onChange={handleChange} className={inputClass} /></div>);
+            const numInput = (label, name) => (<div className="flex flex-col"><label className="text-[9px] font-bold text-gray-500 mb-0.5">{label}</label><input type="number" name={name} value={sal[name] || ''} onChange={handleSalaryChange} className={inputClass} /></div>);
 
             return (
-                <form onSubmit={(e) => { e.preventDefault(); onSave(formData); }} className="space-y-4">
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 bg-blue-50/50 p-4 rounded-xl border border-blue-100">
-                        <div className="col-span-2"><label className="text-[10px] font-bold block mb-0.5">Nama Lengkap</label><input type="text" name="nama" value={formData.nama || ''} onChange={handleChange} required className={`${inputClass} font-bold text-primary`} /></div>
-                        <div className="col-span-2"><label className="text-[10px] font-bold block mb-0.5">Password</label><input type="text" name="password" value={formData.password} onChange={handleChange} required className={inputClass} />
-                            <div className="mt-1 flex items-start gap-1"><input type="checkbox" name="isPasswordChanged" checked={formData.isPasswordChanged} onChange={handleChange} id="pwd" className="mt-0.5 cursor-pointer" /><label htmlFor="pwd" className="text-[8px] text-gray-500 leading-tight cursor-pointer">Sandi telah diubah user.<br/>Hapus centang untuk reset wajib ganti.</label></div>
+                <form onSubmit={(e) => { e.preventDefault(); onSave(formData); }} className="space-y-3">
+                    <div className="grid grid-cols-2 gap-3 bg-blue-50/50 p-3 rounded border border-blue-100">
+                        <div className="col-span-2 md:col-span-1"><label className="text-[10px] font-bold block mb-0.5">Nama Lengkap</label><input type="text" name="nama" value={formData.nama || ''} onChange={handleChange} required className={`${inputClass} font-bold text-primary`} /></div>
+                        <div className="col-span-2 md:col-span-1"><label className="text-[10px] font-bold block mb-0.5">Password</label><input type="text" name="password" value={formData.password} onChange={handleChange} required className={inputClass} />
+                            <div className="mt-1 flex items-start gap-1"><input type="checkbox" name="isPasswordChanged" checked={formData.isPasswordChanged} onChange={handleChange} id="pwd" className="mt-0.5 cursor-pointer" /><label htmlFor="pwd" className="text-[8px] text-gray-500 leading-tight cursor-pointer">Sandi telah diubah user.<br/>Hapus centang untuk reset ke wajib ganti.</label></div>
                         </div>
                         <div className="col-span-1"><label className="text-[10px] font-bold block mb-0.5">Status</label><input type="text" name="status" value={formData.status || ''} onChange={handleChange} className={inputClass} placeholder="GTY/PTY" /></div>
                         <div className="col-span-1"><label className="text-[10px] font-bold block mb-0.5">TMT Pertama</label><input type="text" name="tmt" value={formData.tmt || ''} onChange={handleChange} className={inputClass} placeholder="2005-05-20" /></div>
-                        <div className="col-span-1"><label className="text-[10px] font-bold block mb-0.5">Lama Bekerja</label><input type="text" name="lamaBekerja" value={formData.lamaBekerja || ''} onChange={handleChange} className={inputClass} placeholder="10 Tahun 2 Bulan" /></div>
+                        <div className="col-span-1"><label className="text-[10px] font-bold block mb-0.5">Lama Bekerja</label><input type="text" name="lamaBekerja" value={formData.lamaBekerja || ''} onChange={handleChange} className={inputClass} placeholder="20 tahun 1 bulan" /></div>
                         <div className="col-span-1"><label className="text-[10px] font-bold block mb-0.5">Tugas Tambahan</label><input type="text" name="tugasTambahan" value={formData.tugasTambahan || ''} onChange={handleChange} className={inputClass} placeholder="Wali Kelas" /></div>
                     </div>
                     
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="border border-green-200 rounded-xl p-4 bg-green-50/50">
-                            <h3 className="font-bold text-green-700 text-sm mb-3 border-b border-green-200 pb-2">Penerimaan</h3>
-                            <div className="grid grid-cols-2 gap-3">
+                    <div className="text-center font-bold text-xs bg-slate-800 text-white py-1 rounded">MENGEDIT GAJI PERIODE: {selectedAdminPeriod}</div>
+                    
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div className="border border-green-200 rounded p-3 bg-green-50/50">
+                            <h3 className="font-bold text-green-700 text-[10px] mb-2 border-b border-green-200 pb-1">Penerimaan</h3>
+                            <div className="grid grid-cols-2 gap-2">
                                 {numInput('Gaji Pokok', 'gajiPokok')}{numInput('Tunjangan Keluarga', 'tunjKeluarga')}{numInput('Tunjangan Fungsional Guru', 'tunjFungsionalGuru')}{numInput('Tunjangan Fungsional Karyawan', 'tunjFungsionalKaryawan')}{numInput('Tunjangan Khusus', 'tunjKhusus')}{numInput('Tunjangan Struktural', 'tunjStruktural')}{numInput('Tunjangan Wali Kelas', 'tunjWaliKelas')}{numInput('Transport', 'transport')}{numInput('Tabungan Hari Tua', 'tht')}{numInput('Subsidi BOS', 'subsidiBos')}{numInput('Tugas Tambahan ICP', 'tunjIcp')}{numInput('Koordinator Program', 'koorProgram')}{numInput('Tugas Tambahan BUMA', 'tunjBuma')}{numInput('Tunjangan Laboratorium', 'tunjLab')}
                             </div>
                         </div>
-                        <div className="border border-red-200 rounded-xl p-4 bg-red-50/50">
-                            <h3 className="font-bold text-red-600 text-sm mb-3 border-b border-red-200 pb-2">Potongan</h3>
-                            <div className="grid grid-cols-2 gap-3">
+                        <div className="border border-red-200 rounded p-3 bg-red-50/50">
+                            <h3 className="font-bold text-red-600 text-[10px] mb-2 border-b border-red-200 pb-1">Potongan</h3>
+                            <div className="grid grid-cols-2 gap-2">
                                 {numInput('Tabungan Hari Tua', 'potonganTht')}{numInput('Dana Sosial', 'potonganSosial')}{numInput('Gaji Ditahan', 'potonganDitahan')}{numInput('Struktural Ditahan', 'potonganStrukturalDitahan')}{numInput('Tabungan BUMA', 'potonganBuma')}{numInput('BPJS Kesehatan', 'potonganBpjsKes')}{numInput('BPJS Ketenagakerjaan', 'potonganBpjsTk')}{numInput('Iuran KKG PAI', 'potonganKkgPai')}{numInput('Pinjaman Sekolah', 'pinjamanSekolah')}
                             </div>
                         </div>
                     </div>
-                    <div className="pt-2 sticky bottom-0 bg-white border-t mt-2 pb-2"><button type="submit" className="w-full bg-primary text-white py-2.5 rounded-lg font-bold text-sm hover:bg-primaryDark transition shadow-md">Simpan Perubahan Data ke {formatPeriodUI(currentPeriod)}</button></div>
+                    <div className="pt-2 sticky bottom-0 bg-white border-t mt-2"><button type="submit" className="w-full bg-primary text-white py-2 rounded font-bold hover:bg-primaryDark">Simpan Perubahan</button></div>
                 </form>
             );
         };
