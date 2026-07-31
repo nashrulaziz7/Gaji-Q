@@ -59,11 +59,12 @@
         .print-only-container { display: none; }
         @media print {
             @page { size: 330mm 215mm landscape; margin: 0; }
-            /* Memaksa HP untuk mengakui ukuran F4 (330mm) */
-            body, html { overflow: visible !important; height: auto !important; background: white !important; margin: 0 !important; padding: 0 !important; min-width: 330mm !important; }
+            /* Hapus min-width mm dari body karena merusak render Chrome Android */
+            body, html { overflow: visible !important; height: auto !important; background: white !important; margin: 0 !important; padding: 0 !important; }
             .no-print { display: none !important; }
-            .print-only-container { display: flex !important; flex-direction: column !important; width: 330mm !important; gap: 0 !important; }
-            .page-break { page-break-after: always; box-shadow: none !important; width: 330mm !important; height: 215mm !important; padding: 10mm !important; gap: 10mm !important; background: transparent !important; margin: 0 !important; box-sizing: border-box !important; }
+            /* Gunakan width 100% agar responsif mengikuti ukuran kertas yang dipilih di HP */
+            .print-only-container { display: block !important; width: 100% !important; margin: 0 !important; padding: 0 !important; }
+            .page-break { page-break-after: always; display: flex !important; flex-direction: row !important; box-shadow: none !important; width: 100% !important; height: 100% !important; padding: 5mm !important; gap: 5mm !important; background: transparent !important; margin: 0 !important; box-sizing: border-box !important; }
             * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
         }
         
@@ -287,13 +288,28 @@
 
             useEffect(() => {
                 if (printQueue.users && printQueue.users.length > 0) {
+                    // --- TRIK UBAH NAMA FILE PDF OTOMATIS ---
+                    const originalTitle = document.title;
+                    if (printQueue.users.length === 1) {
+                        document.title = `Slip Gaji - ${printQueue.users[0].nama} - ${printQueue.period}`;
+                    } else {
+                        document.title = `Slip Gaji Batch (${printQueue.users.length} Orang) - ${printQueue.period}`;
+                    }
+
                     // Beri jeda 800ms agar HP punya waktu merender gambar dengan sempurna sebelum print
                     const timer = setTimeout(() => window.print(), 800);
                     
-                    const afterPrint = () => setPrintQueue({ users: [], period: null });
+                    const afterPrint = () => {
+                        document.title = originalTitle; // Kembalikan nama web seperti semula
+                        setPrintQueue({ users: [], period: null });
+                    };
                     window.addEventListener('afterprint', afterPrint);
                     
-                    return () => { clearTimeout(timer); window.removeEventListener('afterprint', afterPrint); };
+                    return () => { 
+                        clearTimeout(timer); 
+                        window.removeEventListener('afterprint', afterPrint); 
+                        document.title = originalTitle; 
+                    };
                 }
             }, [printQueue]);
 
