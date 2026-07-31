@@ -665,7 +665,10 @@
                                 <div className="bg-blue-900/40 p-2.5 md:p-4 rounded-xl flex-1 border border-blue-700/50 shadow-inner flex flex-col justify-center">
                                     <div className="text-[10px] md:text-xs text-blue-200 mb-0.5">Diberikan Kepada:</div>
                                     <div className="font-bold text-sm md:text-lg truncate leading-tight text-white">{c.nama}</div>
-                                    <div className="text-[9px] md:text-[11px] text-blue-100 mt-1">{c.status} • TMT: {formatTglIndo(c.tmt)}</div>
+                                    <div className="text-[9px] md:text-[11px] text-blue-100 mt-1">
+                                        {c.status} • TMT: {formatTglIndo(c.tmt)}<br/>
+                                        Masa Kerja: <span className="font-semibold text-yellow-300">{c.lamaBekerja || '-'}</span>
+                                    </div>
                                 </div>
                                 <div className="bg-gradient-to-br from-accent to-accentDark p-2.5 md:p-4 rounded-xl flex-1 flex flex-col justify-center items-end sm:items-end border border-orange-500/50 shadow-md">
                                     <div className="text-[10px] md:text-xs text-orange-100 mb-0.5">Total Terima Bersih</div>
@@ -686,59 +689,59 @@
                                 </div>
                             ) : (
                                 <>
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 md:gap-4 items-start">
+                                    <div className="grid grid-cols-2 gap-2 md:gap-4 items-start">
                                         {/* Box Penerimaan */}
-                                        <div className="bg-white rounded-xl shadow-sm border border-green-100 p-2 md:p-3 flex flex-col overflow-hidden">
-                                            <div className="text-[11px] md:text-sm font-bold text-green-700 mb-1.5 md:mb-2 border-b border-green-100 pb-1 uppercase tracking-wider bg-green-50 -mx-2 md:-mx-3 px-2 md:px-3 pt-1 md:pt-2">Penerimaan</div>
+                                        <div className="bg-white rounded-xl shadow-sm border border-green-100 p-1.5 sm:p-2 md:p-3 flex flex-col overflow-hidden">
+                                            <div className="text-[9px] sm:text-[11px] md:text-sm font-bold text-green-700 mb-1 md:mb-2 border-b border-green-100 pb-1 uppercase tracking-wider bg-green-50 -mx-1.5 sm:-mx-2 md:-mx-3 px-1.5 sm:px-2 md:px-3 pt-1 md:pt-2">Penerimaan</div>
                                             <div className="flex flex-col">
                                                 {penerimaan.map((item, idx) => (
-                                                    <div key={idx} className="flex justify-between items-center py-1 md:py-1.5 px-1 border-b border-green-50 last:border-0 bg-stripe-green">
-                                                        <span className="text-[9px] md:text-xs text-green-800 truncate pr-1">{item.label}</span>
-                                                        <span className="text-[11px] md:text-sm">{item.val === 0 ? <span className="text-green-600 font-bold">-</span> : <FormattedRp value={item.val} type="green" />}</span>
+                                                    <div key={idx} className="flex justify-between items-center py-1 md:py-1.5 px-0.5 border-b border-green-50 last:border-0 bg-stripe-green">
+                                                        <span className="text-[7.5px] sm:text-[9px] md:text-xs text-green-800 truncate pr-1">{item.label}</span>
+                                                        <span className="text-[8px] sm:text-[11px] md:text-sm">{item.val === 0 ? <span className="text-green-600 font-bold">-</span> : <FormattedRp value={item.val} type="green" />}</span>
                                                     </div>
                                                 ))}
                                             </div>
-                                            <div className="mt-2 pt-2 border-t border-green-200 flex justify-between items-center rounded-lg p-2 bg-green-100 shadow-inner-lg">
-                                                <span className="text-[10px] md:text-xs font-bold text-green-800">TOTAL</span>
-                                                <span className="text-[12px] md:text-base font-bold"><FormattedRp value={totalPenerimaan} type="green" /></span>
+                                            <div className="mt-1 sm:mt-2 pt-1 sm:pt-2 border-t border-green-200 flex justify-between items-center rounded-lg p-1 sm:p-2 bg-green-100 shadow-inner-lg">
+                                                <span className="text-[8px] sm:text-[10px] md:text-xs font-bold text-green-800">TOTAL</span>
+                                                <span className="text-[9px] sm:text-[12px] md:text-base font-bold"><FormattedRp value={totalPenerimaan} type="green" /></span>
                                             </div>
                                         </div>
 
                                         {/* Box Potongan */}
-                                        <div className="bg-white rounded-xl shadow-sm border border-red-100 p-2 md:p-3 flex flex-col overflow-hidden">
-                                            <div className="text-[11px] md:text-sm font-bold text-red-700 mb-1.5 md:mb-2 border-b border-red-100 pb-1 uppercase tracking-wider bg-red-50 -mx-2 md:-mx-3 px-2 md:px-3 pt-1 md:pt-2">Potongan</div>
+                                        <div className="bg-white rounded-xl shadow-sm border border-red-100 p-1.5 sm:p-2 md:p-3 flex flex-col overflow-hidden">
+                                            <div className="text-[9px] sm:text-[11px] md:text-sm font-bold text-red-700 mb-1 md:mb-2 border-b border-red-100 pb-1 uppercase tracking-wider bg-red-50 -mx-1.5 sm:-mx-2 md:-mx-3 px-1.5 sm:px-2 md:px-3 pt-1 md:pt-2">Potongan</div>
                                             <div className="flex flex-col">
                                                 {potongan.map((item, idx) => (
-                                                    <div key={idx} className="flex justify-between items-center py-1 md:py-1.5 px-1 border-b border-red-50 last:border-0 bg-stripe-red">
-                                                        <span className="text-[9px] md:text-xs text-red-800 truncate pr-1">{item.label}</span>
-                                                        <span className="text-[11px] md:text-sm">{item.val === 0 ? <span className="text-red-500 font-bold">-</span> : <FormattedRp value={item.val} type="red" />}</span>
+                                                    <div key={idx} className="flex justify-between items-center py-1 md:py-1.5 px-0.5 border-b border-red-50 last:border-0 bg-stripe-red">
+                                                        <span className="text-[7.5px] sm:text-[9px] md:text-xs text-red-800 truncate pr-1">{item.label}</span>
+                                                        <span className="text-[8px] sm:text-[11px] md:text-sm">{item.val === 0 ? <span className="text-red-500 font-bold">-</span> : <FormattedRp value={item.val} type="red" />}</span>
                                                     </div>
                                                 ))}
                                             </div>
-                                            <div className="mt-2 pt-2 border-t border-red-200 flex justify-between items-center rounded-lg p-2 bg-red-100 shadow-inner-lg">
-                                                <span className="text-[10px] md:text-xs font-bold text-red-800">TOTAL</span>
-                                                <span className="text-[12px] md:text-base font-bold"><FormattedRp value={totalPotongan} type="red" /></span>
+                                            <div className="mt-1 sm:mt-2 pt-1 sm:pt-2 border-t border-red-200 flex justify-between items-center rounded-lg p-1 sm:p-2 bg-red-100 shadow-inner-lg">
+                                                <span className="text-[8px] sm:text-[10px] md:text-xs font-bold text-red-800">TOTAL</span>
+                                                <span className="text-[9px] sm:text-[12px] md:text-base font-bold"><FormattedRp value={totalPotongan} type="red" /></span>
                                             </div>
                                         </div>
                                     </div>
 
-                                    <div className="flex flex-col sm:flex-row justify-between items-end mt-3 md:mt-4 gap-4">
-                                        <div className="bg-blue-50/60 border border-blue-100 p-3 md:p-4 rounded-xl text-[9px] md:text-xs leading-relaxed text-blue-900 shadow-sm flex-1">
-                                            <p className="font-bold mb-1 md:mb-2 text-[10px] md:text-sm text-blue-800">CATATAN PENTING:</p>
-                                            <ol className="list-decimal pl-4 space-y-1 text-justify pr-2">
+                                    <div className="flex flex-row justify-between items-end mt-2 md:mt-4 gap-2 md:gap-4">
+                                        <div className="bg-blue-50/60 border border-blue-100 p-2 md:p-4 rounded-xl text-[7px] sm:text-[9px] md:text-xs leading-relaxed text-blue-900 shadow-sm flex-1">
+                                            <p className="font-bold mb-0.5 md:mb-2 text-[8px] sm:text-[10px] md:text-sm text-blue-800">CATATAN PENTING:</p>
+                                            <ol className="list-decimal pl-3 md:pl-4 space-y-0.5 md:space-y-1 text-justify pr-1 md:pr-2">
                                                 <li>Tabungan hari tua (DPLK) akan langsung disetorkan ke Bank Muamalat Oleh Bendahara, dan kepesertaannya ketika sudah 4 tahun Menjadi Guru/Karyawan Tetap.</li>
                                                 <li>Dana Sosial ditarik setiap bulan sebesar Rp 15.000,- (lima belas ribu rupiah) untuk kegiatan sosial Guru dan Karyawan SDIT Muhammadiyah Al-Kautsar.</li>
                                                 <li>Potongan BPJS Kesehatan ini diberlakukan bagi Bapak/Ibu karyawan yang menambahkan peserta tambahan, seperti orang tua dan/atau mertua, dalam kepesertaan BPJS Kesehatan.</li>
                                                 <li>BPJS Ketenagakerjaan yang diikuti mencakup 4 program (JKK, JKM, JHT, dan JP), namun yang ditanggung oleh sekolah hanya 3 program awal (JKK, JKM, JHT).</li>
                                             </ol>
                                         </div>
-                                        <div className="text-center w-full sm:w-48 flex-none text-slate-700 mt-2 sm:mt-0">
-                                            <p className="mb-1 text-[10px] md:text-xs">Surakarta, {currentDateStr}</p>
-                                            <p className="text-[10px] md:text-xs">Bendahara,</p>
-                                            <div className="h-12 md:h-14 relative my-1 flex justify-center">
+                                        <div className="text-center w-24 sm:w-48 flex-none text-slate-700 mt-0">
+                                            <p className="mb-0.5 md:mb-1 text-[7px] sm:text-[10px] md:text-xs">Surakarta, {currentDateStr}</p>
+                                            <p className="text-[7px] sm:text-[10px] md:text-xs">Bendahara,</p>
+                                            <div className="h-6 sm:h-12 md:h-14 relative my-0.5 md:my-1 flex justify-center">
                                                 <img src={TTD_URL} alt="TTD Bendahara" className="h-full object-contain mix-blend-multiply" />
                                             </div>
-                                            <p className="font-bold underline tracking-wide text-[10px] md:text-xs">Nur Marlena, S. Kom</p>
+                                            <p className="font-bold underline tracking-wide text-[7px] sm:text-[10px] md:text-xs whitespace-nowrap">Nur Marlena, S. Kom</p>
                                         </div>
                                     </div>
                                 </>
