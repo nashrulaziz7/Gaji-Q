@@ -1048,11 +1048,11 @@
                                                     <input type="checkbox" onChange={handleSelectAll} checked={selectedForPrint.length === filteredUsers.length && filteredUsers.length > 0} className="w-3 h-3 cursor-pointer" />
                                                 </th>
                                                 <th className="sticky-cross p-2 border-b border-r min-w-[30px] text-center bg-slate-200 left-[30px]">No</th>
-                                                <th className="sticky-cross p-2 border-b border-r min-w-[150px] left-[60px] bg-slate-200">Nama Lengkap (Klik)</th>
+                                                <th className="sticky-cross p-1.5 md:p-2 border-b border-r w-[120px] min-w-[120px] max-w-[140px] left-[60px] bg-slate-200 whitespace-normal leading-tight">Nama Lengkap (Klik)</th>
                                                 <th className="sticky-header p-2 border-b min-w-[60px] bg-slate-200">Status</th>
                                                 <th className="sticky-header p-2 border-b min-w-[60px] bg-slate-200">TMT</th>
                                                 <th className="sticky-header p-2 border-b min-w-[100px] bg-slate-200">Lama Bekerja</th>
-                                                <th className="sticky-header p-2 border-b min-w-[100px] bg-slate-200">Tugas Tambahan</th>
+                                                <th className="sticky-header p-1.5 md:p-2 border-b min-w-[100px] max-w-[120px] bg-slate-200 whitespace-normal leading-tight">Tugas Tambahan</th>
                                                 <th className="sticky-header p-2 border-b min-w-[80px] bg-slate-200">Password</th>
                                                 <th className="sticky-header p-2 border-b text-right text-green-800 bg-green-100 font-extrabold">Gaji Bersih</th>
                                                 <th className="sticky-header p-2 border-b border-l bg-blue-100 text-blue-800 font-extrabold">Gaji Pokok</th>
@@ -1093,11 +1093,16 @@
                                                         <input type="checkbox" checked={selectedForPrint.includes(u.id)} onChange={(e) => handleSelectOne(e, u.id)} className="w-3 h-3 cursor-pointer" />
                                                     </td>
                                                     <td className="sticky-col p-2 border-r left-[30px] bg-white group-hover:bg-slate-50 group-[.bg-stripe-blue]:bg-slate-50 text-center text-gray-400">{i+1}</td>
-                                                    <td className="sticky-col p-2 border-r left-[60px] bg-white group-hover:bg-slate-50 group-[.bg-stripe-blue]:bg-slate-50 font-bold text-primary cursor-pointer hover:underline" onClick={() => setEditingUser(u)}><div className="flex items-center gap-1.5 w-max">{u.nama} <Icons.Edit /></div></td>
+                                                    <td className="sticky-col p-1.5 border-r left-[60px] bg-white group-hover:bg-slate-50 group-[.bg-stripe-blue]:bg-slate-50 font-bold text-primary cursor-pointer hover:underline whitespace-normal w-[120px] min-w-[120px] max-w-[140px] leading-tight" onClick={() => setEditingUser(u)}>
+                                                        <div className="flex items-start justify-between gap-1">
+                                                            <span className="text-[9px] md:text-[10px] break-words">{u.nama}</span>
+                                                            <span className="flex-none mt-0.5 opacity-60"><Icons.Edit /></span>
+                                                        </div>
+                                                    </td>
                                                     <td className="p-2">{u.status}</td>
                                                     <td className="p-2">{formatTglIndo(u.tmt)}</td>
                                                     <td className="p-2">{u.lamaBekerja}</td>
-                                                    <td className="p-2">{u.tugasTambahan}</td>
+                                                    <td className="p-1.5 md:p-2 whitespace-normal min-w-[100px] max-w-[120px] leading-tight text-[9px] md:text-[10px]">{u.tugasTambahan}</td>
                                                     <td className="p-2 text-center text-[9px]">{u.isPasswordChanged ? <span className="text-green-600 bg-green-100 px-1 rounded">Ubah Sendiri</span> : <span className="text-orange-600 bg-orange-100 px-1 rounded">{u.password}</span>}</td>
                                                     <td className="p-2 text-right font-bold text-green-600 bg-green-50/50">Rp{formatRpPlain(b)}</td>
                                                     <td className="p-2 border-l">{formatRpPlain(sal.gajiPokok)}</td><td className="p-2">{formatRpPlain(sal.tunjKeluarga)}</td><td className="p-2">{formatRpPlain(sal.tunjFungsionalGuru)}</td><td className="p-2">{formatRpPlain(sal.tunjFungsionalKaryawan)}</td><td className="p-2">{formatRpPlain(sal.tunjKhusus)}</td><td className="p-2">{formatRpPlain(sal.tunjStruktural)}</td><td className="p-2">{formatRpPlain(sal.tunjWaliKelas)}</td><td className="p-2">{formatRpPlain(sal.transport)}</td><td className="p-2">{formatRpPlain(sal.tht)}</td><td className="p-2">{formatRpPlain(sal.subsidiBos)}</td><td className="p-2">{formatRpPlain(sal.tunjIcp)}</td><td className="p-2">{formatRpPlain(sal.koorProgram)}</td><td className="p-2">{formatRpPlain(sal.tunjBuma)}</td><td className="p-2">{formatRpPlain(sal.tunjLab)}</td><td className="p-2 border-r bg-blue-100/80 font-bold">{formatRpPlain(p)}</td>
