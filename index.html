@@ -279,9 +279,22 @@
             };
             const replaceAllUsers = (newUsers) => { setUsers(newUsers); syncToCloud(newUsers); };
 
-            const handlePrintBatch = (usersToPrint) => {
-                setPrintQueue(usersToPrint); // Otomatis membuka layar Preview Cetak
+            // Logika Auto-Print: Tangkap Data, Tunggu Render, Langsung Buka Layar PDF
+            const handlePrintBatch = (usersToPrint, periodKey) => {
+                setPrintQueue({ users: usersToPrint, period: periodKey });
             };
+
+            useEffect(() => {
+                if (printQueue.users && printQueue.users.length > 0) {
+                    // Dipercepat menjadi 500ms agar lebih responsif
+                    const timer = setTimeout(() => window.print(), 500);
+                    
+                    const afterPrint = () => setPrintQueue({ users: [], period: null });
+                    window.addEventListener('afterprint', afterPrint);
+                    
+                    return () => { clearTimeout(timer); window.removeEventListener('afterprint', afterPrint); };
+                }
+            }, [printQueue]);
 
             const CloudIndicator = () => (
                 <div className={`fixed top-2 right-2 z-50 p-1.5 rounded-full bg-slate-800 text-white shadow-lg transition-opacity duration-300 no-print ${isSyncing ? 'opacity-100 sync-active' : 'opacity-0'}`}>
@@ -289,24 +302,37 @@
                 </div>
             );
 
-            // Jika sedang mode Print Batch dari Admin (Buka Mode Preview F4 PDF)
-            if (printQueue && printQueue.length > 0) {
+            // Jika masuk mode Print, tampilkan Animasi Loading, layarnya di-hidden saat PDF terbuka
+            if (printQueue && printQueue.users && printQueue.users.length > 0) {
                 const chunks = [];
-                for (let i = 0; i < printQueue.length; i += 2) { chunks.push(printQueue.slice(i, i + 2)); }
+                for (let i = 0; i < printQueue.users.length; i += 2) { chunks.push(printQueue.users.slice(i, i + 2)); }
                 
                 return (
-                    <div className="w-full min-h-screen bg-slate-400 p-4 md:p-8 flex flex-col items-center overflow-y-auto" style={{ fontFamily: 'sans-serif' }}>
-                        <div className="fixed bottom-6 right-6 flex gap-3 z-50 no-print">
-                            <button onClick={() => setPrintQueue([])} className="px-5 py-3 bg-slate-800 text-white rounded-full font-bold shadow-2xl hover:bg-slate-700 transition">Tutup Preview</button>
-                            <button onClick={() => window.print()} className="px-6 py-3 bg-primary text-white rounded-full font-bold shadow-2xl hover:bg-primaryDark flex items-center gap-2 transition transform hover:scale-105"><Icons.Printer /> Cetak / Save PDF</button>
+                    <div className="w-full min-h-screen bg-slate-100 flex flex-col items-center justify-center font-sans">
+                        {/* Layar Loading - Hilang otomatis saat jendela print muncul */}
+                        <div className="no-print flex flex-col items-center justify-center p-8 bg-white rounded-3xl shadow-2xl text-center border-b-4 border-primary">
+                             <div className="w-20 h-20 bg-blue-50 rounded-full flex items-center justify-center text-blue-600 mb-5 shadow-inner animate-pulse">
+                                 <Icons.Printer />
+                             </div>
+                             <h2 className="text-2xl font-extrabold text-slate-800 tracking-tight mb-2">Menyiapkan Dokumen...</h2>
+                             <p className="text-sm text-slate-500 font-medium mb-6">Jendela PDF Print (Landscape) akan otomatis terbuka.</p>
+                             
+                             {/* Tombol Anti-Nyangkut (Sangat berguna saat mode Canvas/Iframe) */}
+                             <button 
+                                 onClick={() => setPrintQueue({ users: [], period: null })} 
+                                 className="px-6 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-full text-xs transition active:scale-95 border border-slate-200"
+                             >
+                                 Selesai / Kembali ke Admin
+                             </button>
                         </div>
                         
-                        <div className="print-only-container flex flex-col gap-8 w-full max-w-[330mm]">
+                        {/* Kertas F4 Sesungguhnya - Muncul HANYA di dalam PDF */}
+                        <div className="hidden print:flex flex-col gap-8 w-full max-w-[330mm]">
                             {chunks.map((chunk, pageIdx) => (
-                                <div key={pageIdx} className="page-break flex flex-row bg-white shadow-2xl w-full h-[215mm] p-[10mm] gap-[10mm]" style={{ boxSizing: 'border-box' }}>
+                                <div key={pageIdx} className="page-break flex flex-row bg-white w-full h-[215mm] p-[10mm] gap-[10mm]" style={{ boxSizing: 'border-box' }}>
                                     {chunk.map((user, idx) => (
                                         <div key={idx} className="flex-1 h-full overflow-hidden border-r border-dashed border-gray-300 pr-[5mm] last:border-r-0 last:pr-0 pl-[5mm] first:pl-0" style={{ width: 'calc(50% - 5mm)' }}>
-                                            <StaticPrintSlip user={user} adminSettings={adminSettings} />
+                                            <StaticPrintSlip user={user} periodKey={printQueue.period} adminSettings={adminSettings} />
                                         </div>
                                     ))}
                                     {chunk.length === 1 && <div className="flex-1 h-full" style={{ width: 'calc(50% - 5mm)' }}></div>}
@@ -584,15 +610,15 @@
                 { label: 'Tabungan Hari Tua', val: parseNum(activeSalary.tht) }, { label: 'Subsidi BOS', val: parseNum(activeSalary.subsidiBos) },
                 { label: 'Tugas Tambahan ICP', val: parseNum(activeSalary.tunjIcp) }, { label: 'Koordinator Program', val: parseNum(activeSalary.koorProgram) },
                 { label: 'Tugas Tambahan BUMA', val: parseNum(activeSalary.tunjBuma) }, { label: 'Tunjangan Laboratorium', val: parseNum(activeSalary.tunjLab) },
-            ].filter(item => item.val > 0);
+            ];
 
             const potongan = [
-                { label: 'Tabungan Hari Tua', val: parseNum(activeSalary.potonganTht) }, { label: 'Dana Sosial', val: parseNum(activeSalary.potonganSosial) },
+                { label: 'Potongan THT', val: parseNum(activeSalary.potonganTht) }, { label: 'Dana Sosial', val: parseNum(activeSalary.potonganSosial) },
                 { label: 'Gaji Ditahan', val: parseNum(activeSalary.potonganDitahan) }, { label: 'Struktural Ditahan', val: parseNum(activeSalary.potonganStrukturalDitahan) },
                 { label: 'Tabungan BUMA', val: parseNum(activeSalary.potonganBuma) }, { label: 'BPJS Kesehatan', val: parseNum(activeSalary.potonganBpjsKes) },
                 { label: 'BPJS Ketenagakerjaan', val: parseNum(activeSalary.potonganBpjsTk) }, { label: 'Iuran KKG PAI', val: parseNum(activeSalary.potonganKkgPai) },
                 { label: 'Pinjaman Sekolah', val: parseNum(activeSalary.pinjamanSekolah) },
-            ].filter(item => item.val > 0);
+            ];
 
             const totalPenerimaan = penerimaan.reduce((sum, item) => sum + item.val, 0);
             const totalPotongan = potongan.reduce((sum, item) => sum + item.val, 0);
@@ -619,12 +645,12 @@
                             </div>
 
                             <div className="flex items-start gap-2.5 md:gap-4 mb-2 md:mb-4 pr-32">
-                                <div className="w-11 h-11 md:w-14 md:h-14 bg-white rounded-lg flex items-center justify-center shadow-sm flex-none p-1">
-                                    <img src={LOGO_URL} alt="Logo" className="w-full h-full object-contain" onError={(e) => e.target.style.display='none'} />
+                                <div className="w-11 h-11 md:w-14 md:h-14 bg-white rounded-xl flex items-center justify-center shadow-sm flex-none p-1 border border-blue-400">
+                                    <img src={ICON_APP_URL} alt="App Logo" className="w-full h-full object-contain rounded-lg" onError={(e) => e.target.style.display='none'} />
                                 </div>
-                                <div>
-                                    <h1 className="font-bold text-[12px] md:text-base leading-tight tracking-wide">SDIT MUHAMMADIYAH AL KAUTSAR</h1>
-                                    <p className="text-[10px] md:text-xs text-blue-200 tracking-wider">GUMPANG KARTASURA</p>
+                                <div className="flex flex-col justify-start">
+                                    {/* Teks Sekolah diganti dengan Gambar Logo Panjang */}
+                                    <img src={LOGO_URL} alt="SDIT Al Kautsar" className="h-10 md:h-12 object-contain object-left drop-shadow-sm mb-1" />
                                     
                                     <button 
                                         onClick={() => { setTempYear(parseInt(selectedPeriod.split('-')[0], 10)); setShowPeriodModal(true); }} 
@@ -660,14 +686,15 @@
                                 </div>
                             ) : (
                                 <>
-                                    <div className="grid grid-cols-2 gap-2 md:gap-4 items-start">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 md:gap-4 items-start">
+                                        {/* Box Penerimaan */}
                                         <div className="bg-white rounded-xl shadow-sm border border-green-100 p-2 md:p-3 flex flex-col overflow-hidden">
                                             <div className="text-[11px] md:text-sm font-bold text-green-700 mb-1.5 md:mb-2 border-b border-green-100 pb-1 uppercase tracking-wider bg-green-50 -mx-2 md:-mx-3 px-2 md:px-3 pt-1 md:pt-2">Penerimaan</div>
                                             <div className="flex flex-col">
                                                 {penerimaan.map((item, idx) => (
                                                     <div key={idx} className="flex justify-between items-center py-1 md:py-1.5 px-1 border-b border-green-50 last:border-0 bg-stripe-green">
                                                         <span className="text-[9px] md:text-xs text-green-800 truncate pr-1">{item.label}</span>
-                                                        <span className="text-[11px] md:text-sm"><FormattedRp value={item.val} type="green" /></span>
+                                                        <span className="text-[11px] md:text-sm">{item.val === 0 ? <span className="text-green-600 font-bold">-</span> : <FormattedRp value={item.val} type="green" />}</span>
                                                     </div>
                                                 ))}
                                             </div>
@@ -677,16 +704,16 @@
                                             </div>
                                         </div>
 
+                                        {/* Box Potongan */}
                                         <div className="bg-white rounded-xl shadow-sm border border-red-100 p-2 md:p-3 flex flex-col overflow-hidden">
                                             <div className="text-[11px] md:text-sm font-bold text-red-700 mb-1.5 md:mb-2 border-b border-red-100 pb-1 uppercase tracking-wider bg-red-50 -mx-2 md:-mx-3 px-2 md:px-3 pt-1 md:pt-2">Potongan</div>
                                             <div className="flex flex-col">
                                                 {potongan.map((item, idx) => (
                                                     <div key={idx} className="flex justify-between items-center py-1 md:py-1.5 px-1 border-b border-red-50 last:border-0 bg-stripe-red">
                                                         <span className="text-[9px] md:text-xs text-red-800 truncate pr-1">{item.label}</span>
-                                                        <span className="text-[11px] md:text-sm"><FormattedRp value={item.val} type="red" /></span>
+                                                        <span className="text-[11px] md:text-sm">{item.val === 0 ? <span className="text-red-500 font-bold">-</span> : <FormattedRp value={item.val} type="red" />}</span>
                                                     </div>
                                                 ))}
-                                                {potongan.length === 0 && <div className="text-[9px] md:text-xs text-red-400 italic text-center py-1">Nihil</div>}
                                             </div>
                                             <div className="mt-2 pt-2 border-t border-red-200 flex justify-between items-center rounded-lg p-2 bg-red-100 shadow-inner-lg">
                                                 <span className="text-[10px] md:text-xs font-bold text-red-800">TOTAL</span>
@@ -695,14 +722,24 @@
                                         </div>
                                     </div>
 
-                                    <div className="bg-blue-50/60 border border-blue-100 p-3 md:p-4 rounded-xl text-[9px] md:text-xs leading-relaxed text-blue-900 mt-3 md:mt-4 shadow-sm">
-                                        <p className="font-bold mb-1 md:mb-2 text-[10px] md:text-sm text-blue-800">CATATAN PENTING:</p>
-                                        <ol className="list-decimal pl-4 space-y-1 text-justify">
-                                            <li>Tabungan hari tua (DPLK) akan langsung disetorkan ke Bank Muamalat Oleh Bendahara, dan kepesertaannya ketika sudah 4 tahun Menjadi Guru/Karyawan Tetap.</li>
-                                            <li>Dana Sosial ditarik setiap bulan sebesar Rp 15.000,- (lima belas ribu rupiah) untuk kegiatan sosial Guru dan Karyawan SDIT Muhammadiyah Al-Kautsar.</li>
-                                            <li>Potongan BPJS Kesehatan ini diberlakukan bagi Bapak/Ibu karyawan yang menambahkan peserta tambahan, seperti orang tua dan/atau mertua, dalam kepesertaan BPJS Kesehatan.</li>
-                                            <li>BPJS Ketenagakerjaan yang diikuti mencakup 4 program (JKK, JKM, JHT, dan JP), namun yang ditanggung oleh sekolah hanya 3 program awal (JKK, JKM, JHT).</li>
-                                        </ol>
+                                    <div className="flex flex-col sm:flex-row justify-between items-end mt-3 md:mt-4 gap-4">
+                                        <div className="bg-blue-50/60 border border-blue-100 p-3 md:p-4 rounded-xl text-[9px] md:text-xs leading-relaxed text-blue-900 shadow-sm flex-1">
+                                            <p className="font-bold mb-1 md:mb-2 text-[10px] md:text-sm text-blue-800">CATATAN PENTING:</p>
+                                            <ol className="list-decimal pl-4 space-y-1 text-justify pr-2">
+                                                <li>Tabungan hari tua (DPLK) akan langsung disetorkan ke Bank Muamalat Oleh Bendahara, dan kepesertaannya ketika sudah 4 tahun Menjadi Guru/Karyawan Tetap.</li>
+                                                <li>Dana Sosial ditarik setiap bulan sebesar Rp 15.000,- (lima belas ribu rupiah) untuk kegiatan sosial Guru dan Karyawan SDIT Muhammadiyah Al-Kautsar.</li>
+                                                <li>Potongan BPJS Kesehatan ini diberlakukan bagi Bapak/Ibu karyawan yang menambahkan peserta tambahan, seperti orang tua dan/atau mertua, dalam kepesertaan BPJS Kesehatan.</li>
+                                                <li>BPJS Ketenagakerjaan yang diikuti mencakup 4 program (JKK, JKM, JHT, dan JP), namun yang ditanggung oleh sekolah hanya 3 program awal (JKK, JKM, JHT).</li>
+                                            </ol>
+                                        </div>
+                                        <div className="text-center w-full sm:w-48 flex-none text-slate-700 mt-2 sm:mt-0">
+                                            <p className="mb-1 text-[10px] md:text-xs">Surakarta, {currentDateStr}</p>
+                                            <p className="text-[10px] md:text-xs">Bendahara,</p>
+                                            <div className="h-12 md:h-14 relative my-1 flex justify-center">
+                                                <img src={TTD_URL} alt="TTD Bendahara" className="h-full object-contain mix-blend-multiply" />
+                                            </div>
+                                            <p className="font-bold underline tracking-wide text-[10px] md:text-xs">Nur Marlena, S. Kom</p>
+                                        </div>
                                     </div>
                                 </>
                             )}
@@ -777,15 +814,15 @@
                 { label: 'Tabungan Hari Tua', val: parseNum(activeSalary.tht) }, { label: 'Subsidi BOS', val: parseNum(activeSalary.subsidiBos) },
                 { label: 'Tugas Tambahan ICP', val: parseNum(activeSalary.tunjIcp) }, { label: 'Koordinator Program', val: parseNum(activeSalary.koorProgram) },
                 { label: 'Tugas Tambahan BUMA', val: parseNum(activeSalary.tunjBuma) }, { label: 'Tunjangan Laboratorium', val: parseNum(activeSalary.tunjLab) },
-            ].filter(item => item.val > 0);
+            ];
 
             const potongan = [
-                { label: 'Tabungan Hari Tua', val: parseNum(activeSalary.potonganTht) }, { label: 'Dana Sosial', val: parseNum(activeSalary.potonganSosial) },
+                { label: 'Potongan THT', val: parseNum(activeSalary.potonganTht) }, { label: 'Dana Sosial', val: parseNum(activeSalary.potonganSosial) },
                 { label: 'Gaji Ditahan', val: parseNum(activeSalary.potonganDitahan) }, { label: 'Struktural Ditahan', val: parseNum(activeSalary.potonganStrukturalDitahan) },
                 { label: 'Tabungan BUMA', val: parseNum(activeSalary.potonganBuma) }, { label: 'BPJS Kesehatan', val: parseNum(activeSalary.potonganBpjsKes) },
                 { label: 'BPJS Ketenagakerjaan', val: parseNum(activeSalary.potonganBpjsTk) }, { label: 'Iuran KKG PAI', val: parseNum(activeSalary.potonganKkgPai) },
                 { label: 'Pinjaman Sekolah', val: parseNum(activeSalary.pinjamanSekolah) },
-            ].filter(item => item.val > 0);
+            ];
 
             const totalPenerimaan = penerimaan.reduce((sum, item) => sum + item.val, 0);
             const totalPotongan = potongan.reduce((sum, item) => sum + item.val, 0);
@@ -801,81 +838,84 @@
             const currentDateStr = new Intl.DateTimeFormat('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date());
 
             return (
-                <div className="w-full h-full flex flex-col bg-white overflow-hidden relative" style={{ fontFamily: 'sans-serif' }}>
+                <div className="w-full h-full flex flex-col bg-white overflow-hidden relative text-gray-800" style={{ fontFamily: 'sans-serif' }}>
                     
                     {/* Kop Surat Atas dari GitHub */}
                     <img src={KOP_ATAS_URL} alt="Kop Surat Atas" className="w-full h-auto object-contain flex-none" />
                     
-                    <div className="px-5 py-2 flex-1 flex flex-col min-h-0 text-[10px]">
-                        <h2 className="text-center font-extrabold text-[12px] uppercase mb-3 underline underline-offset-2">Slip Gaji {currentMonthStr}</h2>
+                    <div className="px-5 py-1 flex-1 flex flex-col min-h-0 text-[10px]">
+                        <h2 className="text-center font-extrabold text-[13px] uppercase mb-2 text-blue-900 border-b-2 border-blue-900 inline-block mx-auto pb-0.5" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>Slip Gaji {currentMonthStr}</h2>
                         
-                        {/* Info Pegawai dengan field tambahan */}
-                        <div className="grid grid-cols-2 gap-x-2 gap-y-1 mb-3 text-[9.5px]">
-                            <div className="flex"><span className="w-24 font-bold">Diberikan Kepada</span><span className="mr-1">:</span><span className="font-extrabold text-[10.5px]">{c.nama}</span></div>
-                            <div className="flex"><span className="w-24 font-bold">Lama Bekerja</span><span className="mr-1">:</span><span>{c.lamaBekerja || '-'}</span></div>
-                            <div className="flex"><span className="w-24 font-bold">Status / TMT</span><span className="mr-1">:</span><span>{c.status} ({formatTglIndo(c.tmt)})</span></div>
-                            <div className="flex"><span className="w-24 font-bold">Tugas Tambahan</span><span className="mr-1">:</span><span>{c.tugasTambahan || '-'}</span></div>
+                        {/* Header Info (Desain Kotak Modern - Dirapatkan) */}
+                        <div className="bg-blue-50 border border-blue-200 p-1.5 rounded-lg mb-1.5 shadow-sm grid grid-cols-2 gap-x-2 gap-y-0.5 text-[9px]" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>
+                            <div className="flex items-start"><span className="w-20 font-bold text-blue-800 flex-none">Diberikan Kepada</span><span className="mr-1 flex-none">:</span><span className="font-extrabold text-[10px] leading-tight">{c.nama}</span></div>
+                            <div className="flex items-start"><span className="w-20 font-bold text-blue-800 flex-none">Lama Bekerja</span><span className="mr-1 flex-none">:</span><span className="font-semibold leading-tight">{c.lamaBekerja || '-'}</span></div>
+                            <div className="flex items-start"><span className="w-20 font-bold text-blue-800 flex-none">Status / TMT</span><span className="mr-1 flex-none">:</span><span className="font-semibold leading-tight">{c.status} ({formatTglIndo(c.tmt)})</span></div>
+                            <div className="flex items-start"><span className="w-20 font-bold text-blue-800 flex-none">Tugas Tambahan</span><span className="mr-1 flex-none">:</span><span className="font-semibold leading-tight">{c.tugasTambahan || '-'}</span></div>
                         </div>
 
-                        {/* Tabel Penerimaan & Potongan */}
+                        {/* Tabel Penerimaan & Potongan (Berdampingan - Jarak diperkecil) */}
                         <div className="grid grid-cols-2 gap-3 flex-1 min-h-0">
-                            <div className="border border-gray-400 p-2 flex flex-col h-full rounded">
-                                <div className="font-bold border-b-2 border-gray-400 pb-1 mb-1 text-center bg-gray-100 uppercase" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>Penerimaan</div>
-                                <div className="flex-1 flex flex-col space-y-0.5 overflow-hidden pr-1">
+                            {/* Box Penerimaan */}
+                            <div className="border border-green-300 flex flex-col h-full rounded-lg overflow-hidden" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>
+                                <div className="font-extrabold border-b border-green-300 py-1 text-center bg-green-100 text-green-900 uppercase tracking-wider text-[9.5px]">Penerimaan</div>
+                                <div className="flex-1 flex flex-col overflow-hidden p-1.5 bg-green-50/30">
                                     {penerimaan.map((item, idx) => (
-                                        <div key={idx} className="flex justify-between items-center text-[9px] border-b border-gray-100 pb-0.5">
-                                            <span className="truncate pr-1">{item.label}</span>
-                                            <span className="font-medium whitespace-nowrap">{formatRpPlain(item.val)}</span>
+                                        <div key={idx} className="flex justify-between items-center text-[8.5px] border-b border-green-100 py-[2px] last:border-0">
+                                            <span className="truncate pr-1 text-green-900">{item.label}</span>
+                                            <span className="font-semibold text-green-800 whitespace-nowrap">{item.val === 0 ? '-' : formatRpPlain(item.val)}</span>
                                         </div>
                                     ))}
                                 </div>
-                                <div className="mt-1 pt-1.5 border-t-2 border-gray-400 flex justify-between font-bold flex-none text-[10px] bg-gray-50 px-1 rounded" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>
+                                <div className="border-t border-green-300 flex justify-between items-center font-extrabold flex-none text-[9.5px] bg-green-200 px-2 py-1 text-green-900">
                                     <span>TOTAL PENERIMAAN</span>
                                     <span>{formatRpPlain(totalPenerimaan)}</span>
                                 </div>
                             </div>
                             
-                            <div className="border border-gray-400 p-2 flex flex-col h-full rounded">
-                                <div className="font-bold border-b-2 border-gray-400 pb-1 mb-1 text-center bg-gray-100 uppercase" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>Potongan</div>
-                                <div className="flex-1 flex flex-col space-y-0.5 overflow-hidden pr-1">
+                            {/* Box Potongan */}
+                            <div className="border border-red-300 flex flex-col h-full rounded-lg overflow-hidden" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>
+                                <div className="font-extrabold border-b border-red-300 py-1 text-center bg-red-100 text-red-900 uppercase tracking-wider text-[9.5px]">Potongan</div>
+                                <div className="flex-1 flex flex-col overflow-hidden p-1.5 bg-red-50/30">
                                     {potongan.map((item, idx) => (
-                                        <div key={idx} className="flex justify-between items-center text-[9px] border-b border-gray-100 pb-0.5">
-                                            <span className="truncate pr-1">{item.label}</span>
-                                            <span className="font-medium whitespace-nowrap">{formatRpPlain(item.val)}</span>
+                                        <div key={idx} className="flex justify-between items-center text-[8.5px] border-b border-red-100 py-[2px] last:border-0">
+                                            <span className="truncate pr-1 text-red-900">{item.label}</span>
+                                            <span className="font-semibold text-red-800 whitespace-nowrap">{item.val === 0 ? '-' : formatRpPlain(item.val)}</span>
                                         </div>
                                     ))}
                                 </div>
-                                <div className="mt-1 pt-1.5 border-t-2 border-gray-400 flex justify-between font-bold flex-none text-[10px] bg-gray-50 px-1 rounded" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>
+                                <div className="border-t border-red-300 flex justify-between items-center font-extrabold flex-none text-[9.5px] bg-red-200 px-2 py-1 text-red-900">
                                     <span>TOTAL POTONGAN</span>
                                     <span>{formatRpPlain(totalPotongan)}</span>
                                 </div>
                             </div>
                         </div>
 
-                        {/* Total Bersih */}
-                        <div className="my-2.5 bg-gray-100 border border-gray-400 p-2 flex justify-between items-center flex-none rounded" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>
-                            <span className="font-bold uppercase text-[11px] tracking-wide">Total Diterima Bersih</span>
-                            <span className="font-extrabold text-[14px]">Rp {formatRpPlain(gajiBersih)}</span>
+                        {/* Total Bersih (Margin atas-bawah dikecilkan) */}
+                        <div className="my-1.5 bg-gradient-to-r from-orange-400 to-orange-500 text-white border border-orange-300 p-1.5 flex justify-between items-center flex-none rounded-lg shadow-sm" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>
+                            <span className="font-extrabold uppercase text-[10px] tracking-widest drop-shadow-sm text-orange-50">Total Diterima Bersih</span>
+                            <span className="font-black text-[14px] drop-shadow-md">Rp {formatRpPlain(gajiBersih)}</span>
                         </div>
 
                         {/* Catatan & Tanda Tangan */}
-                        <div className="flex justify-between mt-1 flex-none items-end">
-                             <div className="text-[8px] max-w-[60%] leading-tight text-gray-700 bg-white p-1 rounded">
+                        <div className="flex justify-between flex-none items-end">
+                             <div className="text-[7.5px] max-w-[72%] leading-tight text-blue-900 bg-blue-50/60 p-1.5 rounded border border-blue-100" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>
                                 <p className="font-bold underline mb-0.5">Catatan Penting:</p>
-                                <ol className="list-decimal pl-3 space-y-0.5">
-                                    <li>Tabungan hari tua (DPLK) disetorkan ke Bank Muamalat.</li>
-                                    <li>Dana Sosial ditarik Rp 15.000,- / bulan.</li>
-                                    <li>BPJS Ketenagakerjaan mencakup 4 program (JKK, JKM, JHT, JP).</li>
+                                <ol className="list-decimal pl-3 space-y-[1px] text-justify pr-1">
+                                    <li>Tabungan hari tua (DPLK) akan langsung disetorkan ke Bank Muamalat Oleh Bendahara, dan kepesertaannya ketika sudah 4 tahun Menjadi Guru/Karyawan Tetap.</li>
+                                    <li>Dana Sosial ditarik setiap bulan sebesar Rp 15.000,- (lima belas ribu rupiah) untuk kegiatan sosial Guru dan Karyawan SDIT Muhammadiyah Al-Kautsar.</li>
+                                    <li>Potongan BPJS Kesehatan ini diberlakukan bagi Bapak/Ibu karyawan yang menambahkan peserta tambahan, seperti orang tua dan/atau mertua, dalam kepesertaan BPJS Kesehatan.</li>
+                                    <li>BPJS Ketenagakerjaan yang diikuti mencakup 4 program (JKK, JKM, JHT, dan JP), namun yang ditanggung oleh sekolah hanya 3 program awal (JKK, JKM, JHT).</li>
                                 </ol>
                             </div>
-                            <div className="text-center w-40 mt-2">
-                                <p className="mb-0.5">Surakarta, {currentDateStr}</p>
-                                <p>Bendahara,</p>
+                            <div className="text-center w-36">
+                                <p className="mb-0.5 text-[9px]">Surakarta, {currentDateStr}</p>
+                                <p className="text-[9px]">Bendahara,</p>
                                 {/* Tanda Tangan SVG/Image Overlay */}
-                                <div className="h-10 relative my-0.5 flex justify-center">
+                                <div className="h-9 relative my-0.5 flex justify-center">
                                     <img src={TTD_URL} alt="TTD Bendahara" className="h-full object-contain mix-blend-multiply" />
                                 </div>
-                                <p className="font-bold underline tracking-wide">Nur Marlena, S. Kom</p>
+                                <p className="font-bold underline tracking-wide text-[9px]">Nur Marlena, S. Kom</p>
                             </div>
                         </div>
                     </div>
