@@ -59,13 +59,36 @@
         .print-only-container { display: none; }
         @media print {
             @page { size: 330mm 215mm landscape; margin: 0; }
-            /* Bunuh semua margin, jadikan kertas sebagai penguasa layar */
-            body, html { overflow: visible !important; height: auto !important; background: white !important; margin: 0 !important; padding: 0 !important; }
+            /* Paksa browser mengenali kanvas F4 Lanskap penuh */
+            body, html { width: 330mm !important; background: white !important; margin: 0 !important; padding: 0 !important; }
             .no-print { display: none !important; }
-            .print-only-container { display: block !important; width: 100% !important; margin: 0 !important; padding: 0 !important; }
+            .print-only-container { display: block !important; width: 330mm !important; margin: 0 !important; padding: 0 !important; }
             
-            /* Kertas F4 Murni tanpa Flexbox */
-            .pdf-page-container { width: 330mm; height: 215mm; page-break-after: always; padding: 8mm 12mm; position: relative; box-sizing: border-box; overflow: hidden; background-color: white; font-family: Arial, sans-serif; }
+            /* Kunci layout berdampingan 2 kolom (Kiri-Kanan) */
+            .page-break { 
+                width: 330mm !important; 
+                height: 215mm !important; 
+                page-break-after: always; 
+                display: flex !important; 
+                flex-direction: row !important; 
+                padding: 10mm !important; 
+                gap: 10mm !important; 
+                box-sizing: border-box !important;
+                margin: 0 !important;
+                background: white !important;
+            }
+            
+            /* Anak kertas (Slip) wajib patuh pada ukuran 1 kolom (Setengah Halaman) */
+            .pdf-page-container { 
+                width: 100% !important; 
+                height: 100% !important; 
+                position: relative; 
+                box-sizing: border-box; 
+                overflow: hidden; 
+                background-color: white; 
+                font-family: Arial, sans-serif; 
+                padding: 0 !important;
+            }
             
             * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }
             
