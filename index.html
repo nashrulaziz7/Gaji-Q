@@ -59,13 +59,19 @@
         .print-only-container { display: none; }
         @media print {
             @page { size: 330mm 215mm landscape; margin: 0; }
-            /* Hapus min-width mm dari body karena merusak render Chrome Android */
+            /* Bunuh semua margin, jadikan kertas sebagai penguasa layar */
             body, html { overflow: visible !important; height: auto !important; background: white !important; margin: 0 !important; padding: 0 !important; }
             .no-print { display: none !important; }
-            /* Gunakan width 100% agar responsif mengikuti ukuran kertas yang dipilih di HP */
             .print-only-container { display: block !important; width: 100% !important; margin: 0 !important; padding: 0 !important; }
-            .page-break { page-break-after: always; display: flex !important; flex-direction: row !important; box-shadow: none !important; width: 100% !important; height: 100% !important; padding: 5mm !important; gap: 5mm !important; background: transparent !important; margin: 0 !important; box-sizing: border-box !important; }
-            * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+            
+            /* Kertas F4 Murni tanpa Flexbox */
+            .pdf-page-container { width: 330mm; height: 215mm; page-break-after: always; padding: 8mm 12mm; position: relative; box-sizing: border-box; overflow: hidden; background-color: white; font-family: Arial, sans-serif; }
+            
+            * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }
+            
+            /* Class Khusus Anti-Error di HP */
+            .native-table { width: 100%; border-collapse: collapse; }
+            .native-table td { vertical-align: top; }
         }
         
         /* Animasi Pop Up */
@@ -288,28 +294,39 @@
 
             useEffect(() => {
                 if (printQueue.users && printQueue.users.length > 0) {
-                    // --- TRIK UBAH NAMA FILE PDF OTOMATIS ---
-                    const originalTitle = document.title;
-                    if (printQueue.users.length === 1) {
-                        document.title = `Slip Gaji - ${printQueue.users[0].nama} - ${printQueue.period}`;
-                    } else {
-                        document.title = `Slip Gaji Batch (${printQueue.users.length} Orang) - ${printQueue.period}`;
-                    }
+                    const executePrintSequence = async () => {
+                        // 1. Trik Ubah Nama File PDF
+                        const originalTitle = document.title;
+                        const periodLabel = printQueue.period || "Bulan_Ini";
+                        if (printQueue.users.length === 1) {
+                            const cleanName = printQueue.users[0].nama.replace(/[^a-zA-Z0-9]/g, '_');
+                            document.title = `Slip_Gaji_${cleanName}_${periodLabel}`;
+                        } else {
+                            document.title = `Slip_Gaji_Batch_${printQueue.users.length}_Orang_${periodLabel}`;
+                        }
 
-                    // Beri jeda 800ms agar HP punya waktu merender gambar dengan sempurna sebelum print
-                    const timer = setTimeout(() => window.print(), 800);
-                    
-                    const afterPrint = () => {
-                        document.title = originalTitle; // Kembalikan nama web seperti semula
-                        setPrintQueue({ users: [], period: null });
+                        // 2. Preloader Gambar Cerdas (Menjamin KOP tidak hilang)
+                        await new Promise((resolve) => {
+                            let loadedCount = 0;
+                            const imagesToLoad = [KOP_ATAS_URL, KOP_BAWAH_URL, TTD_URL];
+                            const checkDone = () => { loadedCount++; if (loadedCount === imagesToLoad.length) resolve(); };
+                            imagesToLoad.forEach(src => {
+                                let img = new Image();
+                                img.onload = checkDone; img.onerror = checkDone; img.src = src;
+                            });
+                        });
+
+                        // 3. Eksekusi Cetak dengan Delay Sangat Singkat (Karena gambar sudah di-cache)
+                        setTimeout(() => {
+                            window.print();
+                            window.onafterprint = () => {
+                                document.title = originalTitle; // Kembalikan judul web
+                                setPrintQueue({ users: [], period: null });
+                            };
+                        }, 300); 
                     };
-                    window.addEventListener('afterprint', afterPrint);
                     
-                    return () => { 
-                        clearTimeout(timer); 
-                        window.removeEventListener('afterprint', afterPrint); 
-                        document.title = originalTitle; 
-                    };
+                    executePrintSequence();
                 }
             }, [printQueue]);
 
@@ -822,6 +839,7 @@
             );
         };
 
+        // KOMPONEN: Template Kertas PDF Master (Native HTML Table - Anti Blank)
         const StaticPrintSlip = ({ user, periodKey, adminSettings }) => {
             const c = user;
             const parseNum = (val) => parseFloat(val?.toString().replace(/[^0-9.-]+/g,"")) || 0;
@@ -856,93 +874,142 @@
                 return `${months[parseInt(m)-1]} ${y}`;
             };
             const currentMonthStr = formatPeriodUI(periodKey);
-            const currentDateStr = new Intl.DateTimeFormat('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }).format(new Date());
+            
+            const getLastWorkingDay = (period) => {
+                if (!period) return new Date();
+                const [year, month] = period.split('-').map(Number);
+                let date = new Date(year, month, 0); 
+                const holidays = ['2026-01-01', '2026-02-17', '2026-03-19', '2026-03-20', '2026-03-21', '2026-04-03', '2026-05-01', '2026-05-14', '2026-05-27', '2026-06-01', '2026-06-16', '2026-08-17', '2026-08-25', '2026-12-25'];
+                const formatDate = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+                while (date.getDay() === 0 || holidays.includes(formatDate(date))) { date.setDate(date.getDate() - 1); }
+                return date;
+            };
+            const currentDateStr = new Intl.DateTimeFormat('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }).format(getLastWorkingDay(periodKey));
 
             return (
-                <div className="w-full h-full flex flex-col bg-white overflow-hidden relative text-gray-800" style={{ fontFamily: 'sans-serif' }}>
+                <div className="pdf-page-container">
+                    <img src={KOP_ATAS_URL} style={{ width: '100%', height: 'auto', display: 'block', margin: '0 auto' }} />
                     
-                    {/* Kop Surat Atas dari GitHub */}
-                    <img src={KOP_ATAS_URL} alt="Kop Surat Atas" className="w-full h-auto object-contain flex-none" />
-                    
-                    <div className="px-5 py-1 flex-1 flex flex-col min-h-0 text-[10px]">
-                        <h2 className="text-center font-extrabold text-[13px] uppercase mb-2 text-blue-900 border-b-2 border-blue-900 inline-block mx-auto pb-0.5" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>Slip Gaji {currentMonthStr}</h2>
+                    <div style={{ padding: '0 5mm' }}>
+                        <div style={{ textAlign: 'center', margin: '6px 0' }}>
+                            <span style={{ fontSize: '12px', fontWeight: '900', borderBottom: '2px solid #1e3a8a', color: '#1e3a8a', paddingBottom: '2px', textTransform: 'uppercase' }}>Slip Gaji {currentMonthStr}</span>
+                        </div>
                         
-                        {/* Header Info (Desain Kotak Modern - Dirapatkan) */}
-                        <div className="bg-blue-50 border border-blue-200 p-1.5 rounded-lg mb-1.5 shadow-sm grid grid-cols-2 gap-x-2 gap-y-0.5 text-[9px]" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>
-                            <div className="flex items-start"><span className="w-20 font-bold text-blue-800 flex-none">Diberikan Kepada</span><span className="mr-1 flex-none">:</span><span className="font-extrabold text-[10px] leading-tight">{c.nama}</span></div>
-                            <div className="flex items-start"><span className="w-20 font-bold text-blue-800 flex-none">Lama Bekerja</span><span className="mr-1 flex-none">:</span><span className="font-semibold leading-tight">{c.lamaBekerja || '-'}</span></div>
-                            <div className="flex items-start"><span className="w-20 font-bold text-blue-800 flex-none">Status / TMT</span><span className="mr-1 flex-none">:</span><span className="font-semibold leading-tight">{c.status} ({formatTglIndo(c.tmt)})</span></div>
-                            <div className="flex items-start"><span className="w-20 font-bold text-blue-800 flex-none">Tugas Tambahan</span><span className="mr-1 flex-none">:</span><span className="font-semibold leading-tight">{c.tugasTambahan || '-'}</span></div>
-                        </div>
+                        {/* Header Info (Table Murni) */}
+                        <table className="native-table" style={{ backgroundColor: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '8px', fontSize: '9px', marginBottom: '8px' }}>
+                            <tbody>
+                                <tr>
+                                    <td style={{ padding: '6px 4px 2px 8px', width: '15%', fontWeight: 'bold', color: '#1e40af' }}>Diberikan Kepada</td>
+                                    <td style={{ padding: '6px 4px 2px 0', width: '2%' }}>:</td>
+                                    <td style={{ padding: '6px 4px 2px 0', width: '33%', fontWeight: '900', fontSize: '10px' }}>{c.nama}</td>
+                                    <td style={{ padding: '6px 4px 2px 8px', width: '15%', fontWeight: 'bold', color: '#1e40af' }}>Lama Bekerja</td>
+                                    <td style={{ padding: '6px 4px 2px 0', width: '2%' }}>:</td>
+                                    <td style={{ padding: '6px 4px 2px 0', width: '33%', fontWeight: 'bold' }}>{c.lamaBekerja || '-'}</td>
+                                </tr>
+                                <tr>
+                                    <td style={{ padding: '2px 4px 6px 8px', fontWeight: 'bold', color: '#1e40af' }}>Status / TMT</td>
+                                    <td style={{ padding: '2px 4px 6px 0' }}>:</td>
+                                    <td style={{ padding: '2px 4px 6px 0', fontWeight: 'bold' }}>{c.status} ({formatTglIndo(c.tmt)})</td>
+                                    <td style={{ padding: '2px 4px 6px 8px', fontWeight: 'bold', color: '#1e40af' }}>Tugas Tambahan</td>
+                                    <td style={{ padding: '2px 4px 6px 0' }}>:</td>
+                                    <td style={{ padding: '2px 4px 6px 0', fontWeight: 'bold' }}>{c.tugasTambahan || '-'}</td>
+                                </tr>
+                            </tbody>
+                        </table>
 
-                        {/* Tabel Penerimaan & Potongan (Berdampingan - Jarak diperkecil) */}
-                        <div className="grid grid-cols-2 gap-3 flex-1 min-h-0">
-                            {/* Box Penerimaan */}
-                            <div className="border border-green-300 flex flex-col h-full rounded-lg overflow-hidden" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>
-                                <div className="font-extrabold border-b border-green-300 py-1 text-center bg-green-100 text-green-900 uppercase tracking-wider text-[9.5px]">Penerimaan</div>
-                                <div className="flex-1 flex flex-col overflow-hidden p-1.5 bg-green-50/30">
-                                    {penerimaan.map((item, idx) => (
-                                        <div key={idx} className="flex justify-between items-center text-[8.5px] border-b border-green-100 py-[2px] last:border-0">
-                                            <span className="truncate pr-1 text-green-900">{item.label}</span>
-                                            <span className="font-semibold text-green-800 whitespace-nowrap">{item.val === 0 ? '-' : formatRpPlain(item.val)}</span>
+                        {/* Tabel Penerimaan & Potongan (Table Murni) */}
+                        <table className="native-table" style={{ marginBottom: '8px' }}>
+                            <tbody>
+                                <tr>
+                                    {/* Kolom Penerimaan */}
+                                    <td style={{ width: '48.5%', border: '1px solid #86efac', borderRadius: '8px', padding: 0 }}>
+                                        <div style={{ backgroundColor: '#dcfce7', color: '#14532d', fontWeight: '900', textAlign: 'center', padding: '5px', fontSize: '9.5px', borderBottom: '1px solid #86efac', borderTopLeftRadius: '7px', borderTopRightRadius: '7px' }}>PENERIMAAN</div>
+                                        <table style={{ width: '100%', fontSize: '8.5px', borderCollapse: 'collapse' }}>
+                                            <tbody>
+                                                {penerimaan.map((item, idx) => (
+                                                    <tr key={idx} style={{ backgroundColor: idx % 2 === 0 ? '#f0fdf4' : '#ffffff' }}>
+                                                        <td style={{ padding: '3.5px 8px', color: '#14532d', borderBottom: '1px solid #dcfce7' }}>{item.label}</td>
+                                                        <td style={{ padding: '3.5px 8px', textAlign: 'right', fontWeight: 'bold', color: '#166534', borderBottom: '1px solid #dcfce7', whiteSpace: 'nowrap' }}>{item.val === 0 ? '-' : formatRpPlain(item.val)}</td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                        <div style={{ backgroundColor: '#bbf7d0', padding: '5px 8px', fontSize: '9.5px', borderTop: '1px solid #86efac', borderBottomLeftRadius: '7px', borderBottomRightRadius: '7px' }}>
+                                            <span style={{ fontWeight: '900', color: '#14532d', float: 'left' }}>TOTAL PENERIMAAN</span>
+                                            <span style={{ fontWeight: '900', color: '#14532d', float: 'right' }}>{formatRpPlain(totalPenerimaan)}</span>
+                                            <div style={{ clear: 'both' }}></div>
                                         </div>
-                                    ))}
-                                </div>
-                                <div className="border-t border-green-300 flex justify-between items-center font-extrabold flex-none text-[9.5px] bg-green-200 px-2 py-1 text-green-900">
-                                    <span>TOTAL PENERIMAAN</span>
-                                    <span>{formatRpPlain(totalPenerimaan)}</span>
-                                </div>
-                            </div>
-                            
-                            {/* Box Potongan */}
-                            <div className="border border-red-300 flex flex-col h-full rounded-lg overflow-hidden" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>
-                                <div className="font-extrabold border-b border-red-300 py-1 text-center bg-red-100 text-red-900 uppercase tracking-wider text-[9.5px]">Potongan</div>
-                                <div className="flex-1 flex flex-col overflow-hidden p-1.5 bg-red-50/30">
-                                    {potongan.map((item, idx) => (
-                                        <div key={idx} className="flex justify-between items-center text-[8.5px] border-b border-red-100 py-[2px] last:border-0">
-                                            <span className="truncate pr-1 text-red-900">{item.label}</span>
-                                            <span className="font-semibold text-red-800 whitespace-nowrap">{item.val === 0 ? '-' : formatRpPlain(item.val)}</span>
+                                    </td>
+                                    
+                                    <td style={{ width: '3%' }}></td>
+                                    
+                                    {/* Kolom Potongan */}
+                                    <td style={{ width: '48.5%', border: '1px solid #fca5a5', borderRadius: '8px', padding: 0 }}>
+                                        <div style={{ backgroundColor: '#fee2e2', color: '#7f1d1d', fontWeight: '900', textAlign: 'center', padding: '5px', fontSize: '9.5px', borderBottom: '1px solid #fca5a5', borderTopLeftRadius: '7px', borderTopRightRadius: '7px' }}>POTONGAN</div>
+                                        <table style={{ width: '100%', fontSize: '8.5px', borderCollapse: 'collapse' }}>
+                                            <tbody>
+                                                {potongan.map((item, idx) => (
+                                                    <tr key={idx} style={{ backgroundColor: idx % 2 === 0 ? '#fef2f2' : '#ffffff' }}>
+                                                        <td style={{ padding: '3.5px 8px', color: '#7f1d1d', borderBottom: '1px solid #fee2e2' }}>{item.label}</td>
+                                                        <td style={{ padding: '3.5px 8px', textAlign: 'right', fontWeight: 'bold', color: '#991b1b', borderBottom: '1px solid #fee2e2', whiteSpace: 'nowrap' }}>{item.val === 0 ? '-' : formatRpPlain(item.val)}</td>
+                                                    </tr>
+                                                ))}
+                                                {/* Baris Kosong Dinamis: Menyamakan tinggi baris Potongan agar sama persis dengan Penerimaan */}
+                                                {[...Array(Math.max(0, penerimaan.length - potongan.length))].map((_, idx) => (
+                                                    <tr key={`empty-${idx}`} style={{ backgroundColor: (potongan.length + idx) % 2 === 0 ? '#fef2f2' : '#ffffff' }}>
+                                                        <td style={{ padding: '3.5px 8px', borderBottom: '1px solid #fee2e2' }}>&nbsp;</td>
+                                                        <td style={{ padding: '3.5px 8px', borderBottom: '1px solid #fee2e2' }}>&nbsp;</td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                        <div style={{ backgroundColor: '#fecaca', padding: '5px 8px', fontSize: '9.5px', borderTop: '1px solid #fca5a5', borderBottomLeftRadius: '7px', borderBottomRightRadius: '7px' }}>
+                                            <span style={{ fontWeight: '900', color: '#7f1d1d', float: 'left' }}>TOTAL POTONGAN</span>
+                                            <span style={{ fontWeight: '900', color: '#7f1d1d', float: 'right' }}>{formatRpPlain(totalPotongan)}</span>
+                                            <div style={{ clear: 'both' }}></div>
                                         </div>
-                                    ))}
-                                </div>
-                                <div className="border-t border-red-300 flex justify-between items-center font-extrabold flex-none text-[9.5px] bg-red-200 px-2 py-1 text-red-900">
-                                    <span>TOTAL POTONGAN</span>
-                                    <span>{formatRpPlain(totalPotongan)}</span>
-                                </div>
-                            </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        {/* Total Bersih (Table Murni) */}
+                        <div style={{ background: 'linear-gradient(to right, #fb923c, #ea580c)', padding: '8px 12px', borderRadius: '8px', color: 'white', marginBottom: '8px' }}>
+                            <span style={{ fontWeight: '900', fontSize: '10.5px', textTransform: 'uppercase', float: 'left', marginTop: '2px' }}>Total Diterima Bersih</span>
+                            <span style={{ fontWeight: '900', fontSize: '15px', float: 'right', textShadow: '1px 1px 2px rgba(0,0,0,0.2)' }}>Rp {formatRpPlain(gajiBersih)}</span>
+                            <div style={{ clear: 'both' }}></div>
                         </div>
 
-                        {/* Total Bersih (Margin atas-bawah dikecilkan) */}
-                        <div className="my-1.5 bg-gradient-to-r from-orange-400 to-orange-500 text-white border border-orange-300 p-1.5 flex justify-between items-center flex-none rounded-lg shadow-sm" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>
-                            <span className="font-extrabold uppercase text-[10px] tracking-widest drop-shadow-sm text-orange-50">Total Diterima Bersih</span>
-                            <span className="font-black text-[14px] drop-shadow-md">Rp {formatRpPlain(gajiBersih)}</span>
-                        </div>
-
-                        {/* Catatan & Tanda Tangan */}
-                        <div className="flex justify-between flex-none items-end">
-                             <div className="text-[7.5px] max-w-[72%] leading-tight text-blue-900 bg-blue-50/60 p-1.5 rounded border border-blue-100" style={{ WebkitPrintColorAdjust: 'exact', printColorAdjust: 'exact' }}>
-                                <p className="font-bold underline mb-0.5">Catatan Penting:</p>
-                                <ol className="list-decimal pl-3 space-y-[1px] text-justify pr-1">
-                                    <li>Tabungan hari tua (DPLK) akan langsung disetorkan ke Bank Muamalat Oleh Bendahara, dan kepesertaannya ketika sudah 4 tahun Menjadi Guru/Karyawan Tetap.</li>
-                                    <li>Dana Sosial ditarik setiap bulan sebesar Rp 15.000,- (lima belas ribu rupiah) untuk kegiatan sosial Guru dan Karyawan SDIT Muhammadiyah Al-Kautsar.</li>
-                                    <li>Potongan BPJS Kesehatan ini diberlakukan bagi Bapak/Ibu karyawan yang menambahkan peserta tambahan, seperti orang tua dan/atau mertua, dalam kepesertaan BPJS Kesehatan.</li>
-                                    <li>BPJS Ketenagakerjaan yang diikuti mencakup 4 program (JKK, JKM, JHT, dan JP), namun yang ditanggung oleh sekolah hanya 3 program awal (JKK, JKM, JHT).</li>
-                                </ol>
-                            </div>
-                            <div className="text-center w-36">
-                                <p className="mb-0.5 text-[9px]">Kartasura, {currentDateStr}</p>
-                                <p className="text-[9px]">Bendahara,</p>
-                                {/* Tanda Tangan SVG/Image Overlay */}
-                                <div className="h-9 relative my-0.5 flex justify-center">
-                                    <img src={TTD_URL} alt="TTD Bendahara" className="h-full object-contain mix-blend-multiply" />
-                                </div>
-                                <p className="font-bold underline tracking-wide text-[9px]">Nur Marlena, S. Kom</p>
-                            </div>
-                        </div>
+                        {/* Catatan & Tanda Tangan (Table Murni) */}
+                        <table className="native-table">
+                            <tbody>
+                                <tr>
+                                    <td style={{ width: '70%', verticalAlign: 'bottom' }}>
+                                        <div style={{ backgroundColor: '#eff6ff', border: '1px solid #bfdbfe', padding: '8px', borderRadius: '8px', fontSize: '7px', color: '#1e3a8a', lineHeight: '1.2' }}>
+                                            <strong style={{ textDecoration: 'underline' }}>Catatan Penting:</strong>
+                                            <ol style={{ paddingLeft: '14px', margin: '4px 0 0 0', textAlign: 'justify', paddingRight: '4px' }}>
+                                                <li>Tabungan hari tua (DPLK) akan langsung disetorkan ke Bank Muamalat Oleh Bendahara, dan kepesertaannya ketika sudah 4 tahun Menjadi Guru/Karyawan Tetap.</li>
+                                                <li>Dana Sosial ditarik setiap bulan sebesar Rp 15.000,- (lima belas ribu rupiah) untuk kegiatan sosial Guru dan Karyawan SDIT Muhammadiyah Al-Kautsar.</li>
+                                                <li>Potongan BPJS Kesehatan ini diberlakukan bagi Bapak/Ibu karyawan yang menambahkan peserta tambahan, seperti orang tua dan/atau mertua, dalam kepesertaan BPJS Kesehatan.</li>
+                                                <li>BPJS Ketenagakerjaan yang diikuti mencakup 4 program (JKK, JKM, JHT, dan JP), namun yang ditanggung oleh sekolah hanya 3 program awal (JKK, JKM, JHT).</li>
+                                            </ol>
+                                        </div>
+                                    </td>
+                                    <td style={{ width: '5%' }}></td>
+                                    <td style={{ width: '25%', verticalAlign: 'bottom', textAlign: 'center', fontSize: '9px', color: '#334155' }}>
+                                        <p style={{ margin: '0 0 4px 0' }}>Kartasura, {currentDateStr}</p>
+                                        <p style={{ margin: '0 0 4px 0' }}>Bendahara,</p>
+                                        <div style={{ height: '45px', width: '100%', position: 'relative' }}>
+                                            <img src={TTD_URL} style={{ height: '100%', width: '100%', objectFit: 'contain', mixBlendMode: 'multiply', position: 'absolute', top: 0, left: 0 }} />
+                                        </div>
+                                        <p style={{ margin: 0, fontWeight: 'bold', textDecoration: 'underline' }}>Nur Marlena, S. Kom</p>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
-                    
-                    {/* Kop Surat Bawah dari GitHub */}
-                    <img src={KOP_BAWAH_URL} alt="Kop Surat Bawah" className="w-full h-auto object-contain flex-none mt-auto" />
+
+                    <img src={KOP_BAWAH_URL} style={{ width: '100%', height: 'auto', position: 'absolute', bottom: 0, left: 0, display: 'block' }} />
                 </div>
             );
         };
