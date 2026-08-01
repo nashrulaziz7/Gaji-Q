@@ -58,44 +58,59 @@
 
         .print-only-container { display: none; }
         @media print {
-            /* Hapus kata "landscape". Cukup berikan urutan: Lebar Tinggi. 
-               Sistem HP akan otomatis mendeteksi ini sebagai Lanskap Kustom (Folio/F4) */
-            @page { size: 330mm 215mm; margin: 0; }
+            /* Paksa ukuran Folio/F4 Lanskap */
+            @page { size: 330mm 215mm; margin: 0 !important; }
             
-            /* Paksa browser mengenali kanvas F4 Lanskap penuh */
-            body, html { width: 330mm !important; background: white !important; margin: 0 !important; padding: 0 !important; }
+            body, html { background: white !important; margin: 0 !important; padding: 0 !important; }
             .no-print { display: none !important; }
-            .print-only-container { display: block !important; width: 330mm !important; margin: 0 !important; padding: 0 !important; }
             
-            /* Kunci layout berdampingan 2 kolom (Kiri-Kanan) */
+            /* Kontainer utama mengunci dari ujung kiri atas kertas */
+            .print-only-container { 
+                display: block !important; 
+                position: absolute !important; 
+                left: 0 !important; 
+                top: 0 !important; 
+                width: 100% !important; 
+                background: white !important;
+            }
+            
+            /* Kertas per lembar (Bypass flexbox, pakai blok mutlak) */
             .page-break { 
                 width: 330mm !important; 
                 height: 215mm !important; 
                 page-break-after: always; 
-                display: flex !important; 
-                flex-direction: row !important; 
-                padding: 4mm !important; 
-                gap: 4mm !important; 
-                box-sizing: border-box !important;
-                margin: 0 !important;
+                position: relative !important; 
                 background: white !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                overflow: hidden !important;
+                box-sizing: border-box !important;
             }
             
-            /* Anak kertas (Slip) wajib patuh pada ukuran 1 kolom (Setengah Halaman) */
+            /* Pembagian 2 Kolom Kiri Kanan Mutlak (165mm = Setengah dari 330mm) */
+            .slip-wrapper {
+                width: 165mm !important; 
+                height: 215mm !important;
+                position: absolute !important;
+                top: 0 !important;
+                padding: 4mm !important;
+                box-sizing: border-box !important;
+            }
+            /* Tempel Slip 1 di ujung kiri, Slip 2 di ujung kanan */
+            .slip-left { left: 0 !important; border-right: 1px dashed #94a3b8 !important; padding-right: 6mm !important; }
+            .slip-right { right: 0 !important; padding-left: 6mm !important; }
+            
+            /* Wadah dalam slip */
             .pdf-page-container { 
                 width: 100% !important; 
                 height: 100% !important; 
                 position: relative; 
                 box-sizing: border-box; 
-                overflow: hidden; 
                 background-color: white; 
                 font-family: Arial, sans-serif; 
-                padding: 0 !important;
             }
             
             * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }
-            
-            /* Class Khusus Anti-Error di HP */
             .native-table { width: 100%; border-collapse: collapse; }
             .native-table td { vertical-align: top; }
         }
@@ -389,13 +404,12 @@
                         {/* Kertas F4 Sesungguhnya - Muncul HANYA di dalam PDF */}
                         <div className="print-only-container">
                             {chunks.map((chunk, pageIdx) => (
-                                <div key={pageIdx} className="page-break flex flex-row bg-white w-full h-[215mm] p-[10mm] gap-[10mm]" style={{ boxSizing: 'border-box' }}>
+                                <div key={pageIdx} className="page-break">
                                     {chunk.map((user, idx) => (
-                                        <div key={idx} className="flex-1 h-full overflow-hidden border-r border-dashed border-gray-300 pr-[5mm] last:border-r-0 last:pr-0 pl-[5mm] first:pl-0" style={{ width: 'calc(50% - 5mm)' }}>
+                                        <div key={idx} className={`slip-wrapper ${idx === 0 ? 'slip-left' : 'slip-right'}`}>
                                             <StaticPrintSlip user={user} periodKey={printQueue.period} adminSettings={adminSettings} />
                                         </div>
                                     ))}
-                                    {chunk.length === 1 && <div className="flex-1 h-full" style={{ width: 'calc(50% - 5mm)' }}></div>}
                                 </div>
                             ))}
                         </div>
