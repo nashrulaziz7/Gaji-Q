@@ -58,7 +58,10 @@
 
         .print-only-container { display: none; }
         @media print {
-            @page { size: 330mm 215mm landscape; margin: 0; }
+            /* Hapus kata "landscape". Cukup berikan urutan: Lebar Tinggi. 
+               Sistem HP akan otomatis mendeteksi ini sebagai Lanskap Kustom (Folio/F4) */
+            @page { size: 330mm 215mm; margin: 0; }
+            
             /* Paksa browser mengenali kanvas F4 Lanskap penuh */
             body, html { width: 330mm !important; background: white !important; margin: 0 !important; padding: 0 !important; }
             .no-print { display: none !important; }
