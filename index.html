@@ -71,8 +71,8 @@
                 page-break-after: always; 
                 display: flex !important; 
                 flex-direction: row !important; 
-                padding: 10mm !important; 
-                gap: 10mm !important; 
+                padding: 4mm !important; 
+                gap: 4mm !important; 
                 box-sizing: border-box !important;
                 margin: 0 !important;
                 background: white !important;
@@ -913,52 +913,52 @@
                 <div className="pdf-page-container">
                     <img src={KOP_ATAS_URL} style={{ width: '100%', height: 'auto', display: 'block', margin: '0 auto' }} />
                     
-                    <div style={{ padding: '0 5mm' }}>
-                        {/* Margin judul dipangkas drastis */}
-                        <div style={{ textAlign: 'center', margin: '2px 0' }}>
-                            <span style={{ fontSize: '11px', fontWeight: '900', borderBottom: '2px solid #1e3a8a', color: '#1e3a8a', paddingBottom: '1px', textTransform: 'uppercase' }}>Slip Gaji {currentMonthStr}</span>
+                    {/* Padding Kiri-Kanan Diperlebar jadi 8mm */}
+                    <div style={{ padding: '0 8mm' }}>
+                        <div style={{ textAlign: 'center', margin: '10px 0' }}>
+                            <span style={{ fontSize: '14px', fontWeight: '900', borderBottom: '2px solid #1e3a8a', color: '#1e3a8a', paddingBottom: '3px', textTransform: 'uppercase' }}>Slip Gaji {currentMonthStr}</span>
                         </div>
                         
-                        {/* Header Info - Padding dipangkas */}
-                        <table className="native-table" style={{ backgroundColor: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '6px', fontSize: '8px', marginBottom: '4px' }}>
+                        {/* Header Info - Font 10px dan Padding diperbesar */}
+                        <table className="native-table" style={{ backgroundColor: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '8px', fontSize: '10px', marginBottom: '10px' }}>
                             <tbody>
                                 <tr>
-                                    <td style={{ padding: '2px 4px 1px 6px', width: '15%', fontWeight: 'bold', color: '#1e40af' }}>Diberikan Kepada</td>
-                                    <td style={{ padding: '2px 4px 1px 0', width: '2%' }}>:</td>
-                                    <td style={{ padding: '2px 4px 1px 0', width: '33%', fontWeight: '900', fontSize: '9px' }}>{c.nama}</td>
-                                    <td style={{ padding: '2px 4px 1px 6px', width: '15%', fontWeight: 'bold', color: '#1e40af' }}>Lama Bekerja</td>
-                                    <td style={{ padding: '2px 4px 1px 0', width: '2%' }}>:</td>
-                                    <td style={{ padding: '2px 4px 1px 0', width: '33%', fontWeight: 'bold' }}>{c.lamaBekerja || '-'}</td>
+                                    <td style={{ padding: '6px 4px 2px 10px', width: '15%', fontWeight: 'bold', color: '#1e40af' }}>Diberikan Kepada</td>
+                                    <td style={{ padding: '6px 4px 2px 0', width: '2%' }}>:</td>
+                                    <td style={{ padding: '6px 4px 2px 0', width: '33%', fontWeight: '900', fontSize: '11px' }}>{c.nama}</td>
+                                    <td style={{ padding: '6px 4px 2px 10px', width: '15%', fontWeight: 'bold', color: '#1e40af' }}>Lama Bekerja</td>
+                                    <td style={{ padding: '6px 4px 2px 0', width: '2%' }}>:</td>
+                                    <td style={{ padding: '6px 4px 2px 0', width: '33%', fontWeight: 'bold' }}>{c.lamaBekerja || '-'}</td>
                                 </tr>
                                 <tr>
-                                    <td style={{ padding: '1px 4px 2px 6px', fontWeight: 'bold', color: '#1e40af' }}>Status / TMT</td>
-                                    <td style={{ padding: '1px 4px 2px 0' }}>:</td>
-                                    <td style={{ padding: '1px 4px 2px 0', fontWeight: 'bold' }}>{c.status} ({formatTglIndo(c.tmt)})</td>
-                                    <td style={{ padding: '1px 4px 2px 6px', fontWeight: 'bold', color: '#1e40af' }}>Tugas Tambahan</td>
-                                    <td style={{ padding: '1px 4px 2px 0' }}>:</td>
-                                    <td style={{ padding: '1px 4px 2px 0', fontWeight: 'bold' }}>{c.tugasTambahan || '-'}</td>
+                                    <td style={{ padding: '2px 4px 6px 10px', fontWeight: 'bold', color: '#1e40af' }}>Status / TMT</td>
+                                    <td style={{ padding: '2px 4px 6px 0' }}>:</td>
+                                    <td style={{ padding: '2px 4px 6px 0', fontWeight: 'bold' }}>{c.status} ({formatTglIndo(c.tmt)})</td>
+                                    <td style={{ padding: '2px 4px 6px 10px', fontWeight: 'bold', color: '#1e40af' }}>Tugas Tambahan</td>
+                                    <td style={{ padding: '2px 4px 6px 0' }}>:</td>
+                                    <td style={{ padding: '2px 4px 6px 0', fontWeight: 'bold' }}>{c.tugasTambahan || '-'}</td>
                                 </tr>
                             </tbody>
                         </table>
 
-                        {/* Tabel Penerimaan & Potongan - Padding baris sangat dipadatkan */}
-                        <table className="native-table" style={{ marginBottom: '4px' }}>
+                        {/* Tabel Penerimaan & Potongan - Font 9.5px & Padding 5px 10px */}
+                        <table className="native-table" style={{ marginBottom: '10px' }}>
                             <tbody>
                                 <tr>
                                     {/* Kolom Penerimaan */}
-                                    <td style={{ width: '48.5%', border: '1px solid #86efac', borderRadius: '6px', padding: 0 }}>
-                                        <div style={{ backgroundColor: '#dcfce7', color: '#14532d', fontWeight: '900', textAlign: 'center', padding: '3px', fontSize: '8.5px', borderBottom: '1px solid #86efac', borderTopLeftRadius: '5px', borderTopRightRadius: '5px' }}>PENERIMAAN</div>
-                                        <table style={{ width: '100%', fontSize: '7.5px', borderCollapse: 'collapse' }}>
+                                    <td style={{ width: '48.5%', border: '1px solid #86efac', borderRadius: '8px', padding: 0 }}>
+                                        <div style={{ backgroundColor: '#dcfce7', color: '#14532d', fontWeight: '900', textAlign: 'center', padding: '6px', fontSize: '10.5px', borderBottom: '1px solid #86efac', borderTopLeftRadius: '7px', borderTopRightRadius: '7px' }}>PENERIMAAN</div>
+                                        <table style={{ width: '100%', fontSize: '9.5px', borderCollapse: 'collapse' }}>
                                             <tbody>
                                                 {penerimaan.map((item, idx) => (
                                                     <tr key={idx} style={{ backgroundColor: idx % 2 === 0 ? '#f0fdf4' : '#ffffff' }}>
-                                                        <td style={{ padding: '2px 6px', color: '#14532d', borderBottom: '1px solid #dcfce7' }}>{item.label}</td>
-                                                        <td style={{ padding: '2px 6px', textAlign: 'right', fontWeight: 'bold', color: '#166534', borderBottom: '1px solid #dcfce7', whiteSpace: 'nowrap' }}>{item.val === 0 ? '-' : formatRpPlain(item.val)}</td>
+                                                        <td style={{ padding: '5px 10px', color: '#14532d', borderBottom: '1px solid #dcfce7' }}>{item.label}</td>
+                                                        <td style={{ padding: '5px 10px', textAlign: 'right', fontWeight: 'bold', color: '#166534', borderBottom: '1px solid #dcfce7', whiteSpace: 'nowrap' }}>{item.val === 0 ? '-' : formatRpPlain(item.val)}</td>
                                                     </tr>
                                                 ))}
                                             </tbody>
                                         </table>
-                                        <div style={{ backgroundColor: '#bbf7d0', padding: '3px 6px', fontSize: '8.5px', borderTop: '1px solid #86efac', borderBottomLeftRadius: '5px', borderBottomRightRadius: '5px' }}>
+                                        <div style={{ backgroundColor: '#bbf7d0', padding: '6px 10px', fontSize: '10.5px', borderTop: '1px solid #86efac', borderBottomLeftRadius: '7px', borderBottomRightRadius: '7px' }}>
                                             <span style={{ fontWeight: '900', color: '#14532d', float: 'left' }}>TOTAL PENERIMAAN</span>
                                             <span style={{ fontWeight: '900', color: '#14532d', float: 'right' }}>{formatRpPlain(totalPenerimaan)}</span>
                                             <div style={{ clear: 'both' }}></div>
@@ -968,26 +968,25 @@
                                     <td style={{ width: '3%' }}></td>
                                     
                                     {/* Kolom Potongan */}
-                                    <td style={{ width: '48.5%', border: '1px solid #fca5a5', borderRadius: '6px', padding: 0 }}>
-                                        <div style={{ backgroundColor: '#fee2e2', color: '#7f1d1d', fontWeight: '900', textAlign: 'center', padding: '3px', fontSize: '8.5px', borderBottom: '1px solid #fca5a5', borderTopLeftRadius: '5px', borderTopRightRadius: '5px' }}>POTONGAN</div>
-                                        <table style={{ width: '100%', fontSize: '7.5px', borderCollapse: 'collapse' }}>
+                                    <td style={{ width: '48.5%', border: '1px solid #fca5a5', borderRadius: '8px', padding: 0 }}>
+                                        <div style={{ backgroundColor: '#fee2e2', color: '#7f1d1d', fontWeight: '900', textAlign: 'center', padding: '6px', fontSize: '10.5px', borderBottom: '1px solid #fca5a5', borderTopLeftRadius: '7px', borderTopRightRadius: '7px' }}>POTONGAN</div>
+                                        <table style={{ width: '100%', fontSize: '9.5px', borderCollapse: 'collapse' }}>
                                             <tbody>
                                                 {potongan.map((item, idx) => (
                                                     <tr key={idx} style={{ backgroundColor: idx % 2 === 0 ? '#fef2f2' : '#ffffff' }}>
-                                                        <td style={{ padding: '2px 6px', color: '#7f1d1d', borderBottom: '1px solid #fee2e2' }}>{item.label}</td>
-                                                        <td style={{ padding: '2px 6px', textAlign: 'right', fontWeight: 'bold', color: '#991b1b', borderBottom: '1px solid #fee2e2', whiteSpace: 'nowrap' }}>{item.val === 0 ? '-' : formatRpPlain(item.val)}</td>
+                                                        <td style={{ padding: '5px 10px', color: '#7f1d1d', borderBottom: '1px solid #fee2e2' }}>{item.label}</td>
+                                                        <td style={{ padding: '5px 10px', textAlign: 'right', fontWeight: 'bold', color: '#991b1b', borderBottom: '1px solid #fee2e2', whiteSpace: 'nowrap' }}>{item.val === 0 ? '-' : formatRpPlain(item.val)}</td>
                                                     </tr>
                                                 ))}
-                                                {/* Baris Kosong Dinamis */}
                                                 {[...Array(Math.max(0, penerimaan.length - potongan.length))].map((_, idx) => (
                                                     <tr key={`empty-${idx}`} style={{ backgroundColor: (potongan.length + idx) % 2 === 0 ? '#fef2f2' : '#ffffff' }}>
-                                                        <td style={{ padding: '2px 6px', borderBottom: '1px solid #fee2e2' }}>&nbsp;</td>
-                                                        <td style={{ padding: '2px 6px', borderBottom: '1px solid #fee2e2' }}>&nbsp;</td>
+                                                        <td style={{ padding: '5px 10px', borderBottom: '1px solid #fee2e2' }}>&nbsp;</td>
+                                                        <td style={{ padding: '5px 10px', borderBottom: '1px solid #fee2e2' }}>&nbsp;</td>
                                                     </tr>
                                                 ))}
                                             </tbody>
                                         </table>
-                                        <div style={{ backgroundColor: '#fecaca', padding: '3px 6px', fontSize: '8.5px', borderTop: '1px solid #fca5a5', borderBottomLeftRadius: '5px', borderBottomRightRadius: '5px' }}>
+                                        <div style={{ backgroundColor: '#fecaca', padding: '6px 10px', fontSize: '10.5px', borderTop: '1px solid #fca5a5', borderBottomLeftRadius: '7px', borderBottomRightRadius: '7px' }}>
                                             <span style={{ fontWeight: '900', color: '#7f1d1d', float: 'left' }}>TOTAL POTONGAN</span>
                                             <span style={{ fontWeight: '900', color: '#7f1d1d', float: 'right' }}>{formatRpPlain(totalPotongan)}</span>
                                             <div style={{ clear: 'both' }}></div>
@@ -997,33 +996,36 @@
                             </tbody>
                         </table>
 
-                        {/* Total Bersih - Padding dan margin dipangkas */}
-                        <div style={{ background: 'linear-gradient(to right, #fb923c, #ea580c)', padding: '4px 8px', borderRadius: '6px', color: 'white', marginBottom: '4px' }}>
-                            <span style={{ fontWeight: '900', fontSize: '10px', textTransform: 'uppercase', float: 'left', marginTop: '2px' }}>Total Diterima Bersih</span>
-                            <span style={{ fontWeight: '900', fontSize: '14px', float: 'right', textShadow: '1px 1px 2px rgba(0,0,0,0.2)' }}>Rp {formatRpPlain(gajiBersih)}</span>
+                        {/* Total Bersih - Dipertebal & Lebih Tinggi */}
+                        <div style={{ background: 'linear-gradient(to right, #fb923c, #ea580c)', padding: '10px 14px', borderRadius: '8px', color: 'white', marginBottom: '12px' }}>
+                            <span style={{ fontWeight: '900', fontSize: '11.5px', textTransform: 'uppercase', float: 'left', marginTop: '2px' }}>Total Diterima Bersih</span>
+                            <span style={{ fontWeight: '900', fontSize: '16px', float: 'right', textShadow: '1px 1px 2px rgba(0,0,0,0.2)' }}>Rp {formatRpPlain(gajiBersih)}</span>
                             <div style={{ clear: 'both' }}></div>
                         </div>
 
-                        {/* Catatan & Tanda Tangan - Teks dikecilkan dan dirapatkan */}
+                        {/* Catatan & Tanda Tangan - Teks Jelas, Line-Height Lega, List Decimal Aktif! */}
                         <table className="native-table">
                             <tbody>
                                 <tr>
                                     <td style={{ width: '70%', verticalAlign: 'bottom' }}>
-                                        <div style={{ backgroundColor: '#eff6ff', border: '1px solid #bfdbfe', padding: '4px 6px', borderRadius: '6px', fontSize: '6.5px', color: '#1e3a8a', lineHeight: '1.1' }}>
-                                            <strong style={{ textDecoration: 'underline' }}>Catatan Penting:</strong>
-                                            <ol style={{ paddingLeft: '12px', margin: '2px 0 0 0', textAlign: 'justify', paddingRight: '2px' }}>
-                                                <li style={{ marginBottom: '1px' }}>Tabungan hari tua (DPLK) akan langsung disetorkan ke Bank Muamalat Oleh Bendahara, dan kepesertaannya ketika sudah 4 tahun Menjadi Guru/Karyawan Tetap.</li>
-                                                <li style={{ marginBottom: '1px' }}>Dana Sosial ditarik setiap bulan sebesar Rp 15.000,- (lima belas ribu rupiah) untuk kegiatan sosial Guru dan Karyawan SDIT Muhammadiyah Al-Kautsar.</li>
-                                                <li style={{ marginBottom: '1px' }}>Potongan BPJS Kesehatan ini diberlakukan bagi Bapak/Ibu karyawan yang menambahkan peserta tambahan, seperti orang tua dan/atau mertua, dalam kepesertaan BPJS Kesehatan.</li>
+                                        <div style={{ backgroundColor: '#eff6ff', border: '1px solid #bfdbfe', padding: '10px', borderRadius: '8px', fontSize: '8.5px', color: '#1e3a8a', lineHeight: '1.4' }}>
+                                            <strong style={{ textDecoration: 'underline', fontSize: '9px' }}>Catatan Penting:</strong>
+                                            
+                                            {/* listStyleType: 'decimal' adalah kunci memunculkan angka */}
+                                            <ol style={{ paddingLeft: '18px', margin: '4px 0 0 0', textAlign: 'justify', paddingRight: '6px', listStyleType: 'decimal' }}>
+                                                <li style={{ marginBottom: '2px' }}>Tabungan hari tua (DPLK) akan langsung disetorkan ke Bank Muamalat Oleh Bendahara, dan kepesertaannya ketika sudah 4 tahun Menjadi Guru/Karyawan Tetap.</li>
+                                                <li style={{ marginBottom: '2px' }}>Dana Sosial ditarik setiap bulan sebesar Rp 15.000,- (lima belas ribu rupiah) untuk kegiatan sosial Guru dan Karyawan SDIT Muhammadiyah Al-Kautsar.</li>
+                                                <li style={{ marginBottom: '2px' }}>Potongan BPJS Kesehatan ini diberlakukan bagi Bapak/Ibu karyawan yang menambahkan peserta tambahan, seperti orang tua dan/atau mertua, dalam kepesertaan BPJS Kesehatan.</li>
                                                 <li>BPJS Ketenagakerjaan yang diikuti mencakup 4 program (JKK, JKM, JHT, dan JP), namun yang ditanggung oleh sekolah hanya 3 program awal (JKK, JKM, JHT).</li>
                                             </ol>
                                         </div>
                                     </td>
                                     <td style={{ width: '5%' }}></td>
-                                    <td style={{ width: '25%', verticalAlign: 'bottom', textAlign: 'center', fontSize: '8px', color: '#334155' }}>
-                                        <p style={{ margin: '0 0 2px 0' }}>Kartasura, {currentDateStr}</p>
-                                        <p style={{ margin: '0 0 2px 0' }}>Bendahara,</p>
-                                        <div style={{ height: '35px', width: '100%', position: 'relative' }}>
+                                    <td style={{ width: '25%', verticalAlign: 'bottom', textAlign: 'center', fontSize: '10px', color: '#334155' }}>
+                                        <p style={{ margin: '0 0 4px 0' }}>Kartasura, {currentDateStr}</p>
+                                        <p style={{ margin: '0 0 4px 0' }}>Bendahara,</p>
+                                        {/* Tanda Tangan Diperbesar Menutupi Ruang Kosong Bawah */}
+                                        <div style={{ height: '60px', width: '100%', position: 'relative' }}>
                                             <img src={TTD_URL} style={{ height: '100%', width: '100%', objectFit: 'contain', mixBlendMode: 'multiply', position: 'absolute', top: 0, left: 0 }} />
                                         </div>
                                         <p style={{ margin: 0, fontWeight: 'bold', textDecoration: 'underline' }}>Nur Marlena, S. Kom</p>
