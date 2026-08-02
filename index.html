@@ -315,7 +315,7 @@
                         const user = users.find(u => u.nama === savedLogin.username && u.password === savedLogin.password);
                         if (user) {
                             setCurrentUser(user); setUserRole('gurkar');
-                            setView(user.isPasswordChanged ? 'dashboard' : 'force_password');
+                            setView(user.isPasswordChanged && user.password !== '123' ? 'dashboard' : 'force_password');
                         }
                     }
                 }
@@ -465,7 +465,7 @@
                     if (user) {
                         if (rememberMe) localStorage.setItem('gajiq_saved_login', JSON.stringify({ role: 'gurkar', username, password }));
                         setCurrentUser(user); setUserRole('gurkar');
-                        setView(user.isPasswordChanged ? 'dashboard' : 'force_password');
+                        setView(user.isPasswordChanged && user.password !== '123' ? 'dashboard' : 'force_password');
                     } else setError('Password salah! Default: 123');
                 }
             };
@@ -1215,7 +1215,19 @@
                                                     <td className="p-2">{formatTglIndo(u.tmt)}</td>
                                                     <td className="p-2">{u.lamaBekerja}</td>
                                                     <td className="p-1.5 md:p-2 whitespace-normal min-w-[100px] max-w-[120px] leading-tight text-[9px] md:text-[10px]">{u.tugasTambahan}</td>
-                                                    <td className="p-2 text-center text-[9px]">{u.isPasswordChanged ? <span className="text-green-600 bg-green-100 px-1 rounded">Ubah Sendiri</span> : <span className="text-orange-600 bg-orange-100 px-1 rounded">{u.password}</span>}</td>
+                                                    <td className="p-2 text-center text-[9px]">
+                                                        {u.isPasswordChanged && u.password !== '123' ? (
+                                                            <button 
+                                                                onClick={() => showModal({ title: 'Info Password Rahasia', message: `Password terbaru milik ${u.nama} saat ini adalah: ${u.password}`, type: 'alert' })} 
+                                                                className="text-green-700 bg-green-100 px-1.5 py-0.5 rounded shadow-sm border border-green-200 hover:bg-green-200 active:scale-95 transition cursor-pointer font-bold"
+                                                                title="Klik untuk melihat password"
+                                                            >
+                                                                Ubah Sendiri
+                                                            </button>
+                                                        ) : (
+                                                            <span className="text-orange-600 bg-orange-100 px-1.5 py-0.5 rounded font-bold border border-orange-200">{u.password}</span>
+                                                        )}
+                                                    </td>
                                                     <td className="p-2 text-right font-bold text-green-600 bg-green-50/50">Rp{formatRpPlain(b)}</td>
                                                     <td className="p-2 border-l">{formatRpPlain(sal.gajiPokok)}</td><td className="p-2">{formatRpPlain(sal.tunjKeluarga)}</td><td className="p-2">{formatRpPlain(sal.tunjFungsionalGuru)}</td><td className="p-2">{formatRpPlain(sal.tunjFungsionalKaryawan)}</td><td className="p-2">{formatRpPlain(sal.tunjKhusus)}</td><td className="p-2">{formatRpPlain(sal.tunjStruktural)}</td><td className="p-2">{formatRpPlain(sal.tunjWaliKelas)}</td><td className="p-2">{formatRpPlain(sal.transport)}</td><td className="p-2">{formatRpPlain(sal.tht)}</td><td className="p-2">{formatRpPlain(sal.subsidiBos)}</td><td className="p-2">{formatRpPlain(sal.tunjIcp)}</td><td className="p-2">{formatRpPlain(sal.koorProgram)}</td><td className="p-2">{formatRpPlain(sal.tunjBuma)}</td><td className="p-2">{formatRpPlain(sal.tunjLab)}</td><td className="p-2 border-r bg-blue-100/80 font-bold">{formatRpPlain(p)}</td>
                                                     <td className="p-2">{formatRpPlain(sal.potonganTht)}</td><td className="p-2">{formatRpPlain(sal.potonganSosial)}</td><td className="p-2">{formatRpPlain(sal.potonganDitahan)}</td><td className="p-2">{formatRpPlain(sal.potonganStrukturalDitahan)}</td><td className="p-2">{formatRpPlain(sal.potonganBuma)}</td><td className="p-2">{formatRpPlain(sal.potonganBpjsKes)}</td><td className="p-2">{formatRpPlain(sal.potonganBpjsTk)}</td><td className="p-2">{formatRpPlain(sal.potonganKkgPai)}</td><td className="p-2">{formatRpPlain(sal.pinjamanSekolah)}</td><td className="p-2 bg-red-100/80 font-bold">{formatRpPlain(m)}</td>
@@ -1462,7 +1474,14 @@
                 if(!init.riwayatGaji[selectedAdminPeriod]) init.riwayatGaji[selectedAdminPeriod] = {};
                 return init; 
             });
-            const handleChange = (e) => { const { name, value, type, checked } = e.target; setFormData(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value })); };
+            const handleChange = (e) => { 
+                const { name, value, type, checked } = e.target; 
+                setFormData(prev => {
+                    const newState = { ...prev, [name]: type === 'checkbox' ? checked : value };
+                    if (name === 'password' && value === '123') newState.isPasswordChanged = false;
+                    return newState;
+                });
+            };
             const handleSalaryChange = (e) => {
                 const { name, value } = e.target;
                 setFormData(prev => ({
