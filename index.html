@@ -33,7 +33,6 @@
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f3f4f6; overflow: hidden; }
         
-        /* Scrollbar styles tipis */
         ::-webkit-scrollbar { width: 5px; height: 5px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 5px; }
@@ -56,66 +55,73 @@
         .bg-stripe-green:nth-child(even) { background-color: #f0fdf4; }
         .bg-stripe-red:nth-child(even) { background-color: #fef2f2; }
 
+        /* =========================================================
+           CSS PRINT ABSOLUTE - DIJAMIN 1000% ANTI PAGINATION BUG CHROME
+           ========================================================= */
         .print-only-container { display: none; }
         @media print {
-            /* Paksa ukuran Folio/F4 Lanskap */
-            @page { size: 330mm 215mm; margin: 0 !important; }
+            @page { size: 330mm 215mm landscape; margin: 0 !important; }
             
-            body, html { background: white !important; margin: 0 !important; padding: 0 !important; }
+            body, html { 
+                width: 330mm !important; 
+                margin: 0 !important; 
+                padding: 0 !important; 
+                background: white !important; 
+            }
             .no-print { display: none !important; }
             
-            /* Kontainer utama mengunci dari ujung kiri atas kertas */
             .print-only-container { 
                 display: block !important; 
-                position: absolute !important; 
-                left: 0 !important; 
-                top: 0 !important; 
-                width: 100% !important; 
+                width: 330mm !important; 
+                margin: 0 !important; 
+                padding: 0 !important;
                 background: white !important;
             }
             
-            /* Kertas per lembar (Bypass flexbox, pakai blok mutlak) */
-            .page-break { 
-                width: 330mm !important; 
-                height: 215mm !important; 
-                page-break-after: always; 
-                position: relative !important; 
+            /* Wadah 1 Lembar F4 - Dipaku Absolute anti pecah halaman */
+            .print-page-wrapper {
+                position: relative !important;
+                width: 330mm !important;
+                height: 215mm !important;
+                page-break-after: always !important;
+                page-break-inside: avoid !important;
+                overflow: hidden !important;
                 background: white !important;
                 margin: 0 !important;
                 padding: 0 !important;
-                overflow: hidden !important;
-                box-sizing: border-box !important;
             }
             
-            /* Pembagian 2 Kolom Kiri Kanan Mutlak (165mm = Setengah dari 330mm) */
-            .slip-wrapper {
-                width: 165mm !important; 
-                height: 215mm !important;
+            /* Koordinat Absolut Kiri & Kanan */
+            .slip-left, .slip-right {
                 position: absolute !important;
                 top: 0 !important;
-                padding: 4mm !important;
+                height: 215mm !important;
+                width: 165mm !important;
+                overflow: hidden !important;
                 box-sizing: border-box !important;
-            }
-            /* Tempel Slip 1 di ujung kiri, Slip 2 di ujung kanan */
-            .slip-left { left: 0 !important; border-right: 1px dashed #94a3b8 !important; padding-right: 6mm !important; }
-            .slip-right { right: 0 !important; padding-left: 6mm !important; }
-            
-            /* Wadah dalam slip */
-            .pdf-page-container { 
-                width: 100% !important; 
-                height: 100% !important; 
-                position: relative; 
-                box-sizing: border-box; 
-                background-color: white; 
-                font-family: Arial, sans-serif; 
+                padding: 0 !important; /* DIBUAT 0 AGAR KOP FULL KANAN-KIRI */
+                background: white !important;
             }
             
-            * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }
+            .slip-left {
+                left: 0 !important;
+                border-right: 1px dashed #94a3b8 !important;
+            }
+            
+            .slip-right {
+                left: 165mm !important;
+            }
+
+            * { 
+                -webkit-print-color-adjust: exact !important; 
+                print-color-adjust: exact !important; 
+                color-adjust: exact !important; 
+                page-break-inside: avoid !important;
+            }
             .native-table { width: 100%; border-collapse: collapse; }
             .native-table td { vertical-align: top; }
         }
         
-        /* Animasi Pop Up */
         @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
     </style>
 </head>
@@ -125,7 +131,6 @@
     <script type="text/babel">
         const { useState, useEffect, useMemo, useRef } = React;
 
-        // =====================================================================
         const LOGO_URL = "https://raw.githubusercontent.com/nashrulaziz7/Gaji-Q/main/alkaspg.png";
         const TTD_URL = "https://raw.githubusercontent.com/nashrulaziz7/Gaji-Q/main/ttd.png";
         const KOP_ATAS_URL = "https://raw.githubusercontent.com/nashrulaziz7/Gaji-Q/main/kopatas.png";
@@ -134,20 +139,16 @@
         const ICON_APP_URL = "https://raw.githubusercontent.com/nashrulaziz7/Gaji-Q/main/iconapp.png";
         const GAS_URL = "https://script.google.com/macros/s/AKfycbxTr6qv3SJCK4XIePo_QXgi1Wd7YnOL67YMfUAQPcFYz3USPKv1K55-w1OJAlE2_SOo/exec";
 
-        // Injeksi PWA (Progressive Web App) untuk Fitur Install Otomatis
         const manifest = { name: "Gaji•Q", short_name: "Gaji•Q", start_url: ".", display: "standalone", background_color: "#f3f4f6", theme_color: "#2563eb", icons: [{ src: ICON_APP_URL, sizes: "512x512", type: "image/png", purpose: "any maskable" }] };
         const manifestUrl = URL.createObjectURL(new Blob([JSON.stringify(manifest)], { type: 'application/json' }));
         document.querySelector('head').insertAdjacentHTML('beforeend', `<link rel="manifest" href="${manifestUrl}"><link rel="icon" href="${ICON_APP_URL}"><link rel="apple-touch-icon" href="${ICON_APP_URL}">`);
         
-        // Gunakan try-catch agar tidak error jika browser (atau canvas) memblokir blob ServiceWorker
         try {
             const swUrl = URL.createObjectURL(new Blob(["self.addEventListener('install', e => self.skipWaiting()); self.addEventListener('activate', e => e.waitUntil(clients.claim())); self.addEventListener('fetch', e => {});"], { type: 'application/javascript' }));
             if ('serviceWorker' in navigator) {
                 navigator.serviceWorker.register(swUrl).catch(e => console.log("PWA ServiceWorker terblokir aman."));
             }
         } catch(e) {}
-
-        // =====================================================================
 
         const Icons = {
             Eye: () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>,
@@ -243,7 +244,6 @@
             
             const syncTimeout = useRef(null);
 
-            // Deteksi jika browser mengizinkan Install Aplikasi
             useEffect(() => {
                 const handler = (e) => { e.preventDefault(); setDeferredPrompt(e); };
                 window.addEventListener('beforeinstallprompt', handler);
@@ -328,7 +328,6 @@
             };
             const replaceAllUsers = (newUsers) => { setUsers(newUsers); syncToCloud(newUsers); };
 
-            // Logika Auto-Print: Tangkap Data, Tunggu Render, Langsung Buka Layar PDF
             const handlePrintBatch = (usersToPrint, periodKey) => {
                 setPrintQueue({ users: usersToPrint, period: periodKey });
             };
@@ -336,7 +335,6 @@
             useEffect(() => {
                 if (printQueue.users && printQueue.users.length > 0) {
                     const executePrintSequence = async () => {
-                        // 1. Trik Ubah Nama File PDF
                         const originalTitle = document.title;
                         const periodLabel = printQueue.period || "Bulan_Ini";
                         if (printQueue.users.length === 1) {
@@ -346,7 +344,6 @@
                             document.title = `Slip_Gaji_Batch_${printQueue.users.length}_Orang_${periodLabel}`;
                         }
 
-                        // 2. Preloader Gambar Cerdas (Menjamin KOP tidak hilang)
                         await new Promise((resolve) => {
                             let loadedCount = 0;
                             const imagesToLoad = [KOP_ATAS_URL, KOP_BAWAH_URL, TTD_URL];
@@ -357,14 +354,13 @@
                             });
                         });
 
-                        // 3. Eksekusi Cetak dengan Delay Sangat Singkat (Karena gambar sudah di-cache)
                         setTimeout(() => {
                             window.print();
                             window.onafterprint = () => {
-                                document.title = originalTitle; // Kembalikan judul web
+                                document.title = originalTitle; 
                                 setPrintQueue({ users: [], period: null });
                             };
-                        }, 300); 
+                        }, 500); 
                     };
                     
                     executePrintSequence();
@@ -377,39 +373,41 @@
                 </div>
             );
 
-            // Jika masuk mode Print, tampilkan Animasi Loading, layarnya di-hidden saat PDF terbuka
+            // ==============================================================================
+            // LAYOUT RENDER CETAK FINAL (ABSOLUTE POSITIONING - ANTI BUG CHROME)
+            // ==============================================================================
             if (printQueue && printQueue.users && printQueue.users.length > 0) {
                 const chunks = [];
                 for (let i = 0; i < printQueue.users.length; i += 2) { chunks.push(printQueue.users.slice(i, i + 2)); }
                 
                 return (
                     <div className="w-full min-h-screen bg-slate-100 flex flex-col items-center justify-center font-sans">
-                        {/* Layar Loading - Hilang otomatis saat jendela print muncul */}
-                        <div className="no-print flex flex-col items-center justify-center p-8 bg-white rounded-3xl shadow-2xl text-center border-b-4 border-primary">
+                        
+                        <div className="no-print flex flex-col items-center justify-center p-8 bg-white rounded-3xl shadow-2xl text-center border-b-4 border-primary absolute inset-0 z-50">
                              <div className="w-20 h-20 bg-blue-50 rounded-full flex items-center justify-center text-blue-600 mb-5 shadow-inner animate-pulse">
                                  <Icons.Printer />
                              </div>
                              <h2 className="text-2xl font-extrabold text-slate-800 tracking-tight mb-2">Menyiapkan Dokumen...</h2>
                              <p className="text-sm text-slate-500 font-medium mb-6">Jendela PDF Print (Landscape) akan otomatis terbuka.</p>
-                             
-                             {/* Tombol Anti-Nyangkut (Sangat berguna saat mode Canvas/Iframe) */}
                              <button 
                                  onClick={() => setPrintQueue({ users: [], period: null })} 
                                  className="px-6 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-full text-xs transition active:scale-95 border border-slate-200"
                              >
-                                 Selesai / Kembali ke Admin
+                                 Batal Cetak / Selesai
                              </button>
                         </div>
                         
-                        {/* Kertas F4 Sesungguhnya - Muncul HANYA di dalam PDF */}
                         <div className="print-only-container">
                             {chunks.map((chunk, pageIdx) => (
-                                <div key={pageIdx} className="page-break">
-                                    {chunk.map((user, idx) => (
-                                        <div key={idx} className={`slip-wrapper ${idx === 0 ? 'slip-left' : 'slip-right'}`}>
-                                            <StaticPrintSlip user={user} periodKey={printQueue.period} adminSettings={adminSettings} />
+                                <div key={pageIdx} className="print-page-wrapper">
+                                    <div className="slip-left">
+                                        <StaticPrintSlip user={chunk[0]} periodKey={printQueue.period} adminSettings={adminSettings} />
+                                    </div>
+                                    {chunk.length > 1 && (
+                                        <div className="slip-right">
+                                            <StaticPrintSlip user={chunk[1]} periodKey={printQueue.period} adminSettings={adminSettings} />
                                         </div>
-                                    ))}
+                                    )}
                                 </div>
                             ))}
                         </div>
@@ -436,7 +434,6 @@
             const [adminClicks, setAdminClicks] = useState(0);
             const [isAdminMode, setIsAdminMode] = useState(false);
             
-            // State untuk Dropdown Custom
             const [isDropdownOpen, setIsDropdownOpen] = useState(false);
             const [searchName, setSearchName] = useState('');
 
@@ -473,7 +470,6 @@
                 }
             };
 
-            // Logika Eksekusi Install Aplikasi (PWA)
             const installApp = async () => {
                 if (deferredPrompt) {
                     deferredPrompt.prompt();
@@ -493,7 +489,6 @@
 
                     <div className={`relative w-full max-w-sm p-6 rounded-2xl shadow-2xl ${isAdminMode ? 'glass-dark text-white' : 'glass text-gray-800'}`}>
                         <div className="text-center mb-6 mt-2">
-                            {/* Logo dari GitHub (Diperbesar agar terlihat profesional) */}
                             <img src={ICON_LOGIN_URL} alt="Gaji-Q Icon" className="w-56 sm:w-64 h-auto mx-auto drop-shadow-xl mb-4" onError={(e) => {e.target.style.display='none'}} />
                             {isAdminMode && <h2 className="text-lg font-bold text-white mt-3">Login Administrator</h2>}
                         </div>
@@ -507,7 +502,6 @@
                                         <input type="text" value={username} readOnly className="w-full pl-9 pr-3 py-2.5 text-sm rounded-lg border bg-slate-800 border-slate-700 text-gray-400 cursor-not-allowed focus:outline-none" />
                                     ) : (
                                         <>
-                                            {/* Dropdown Modern Custom */}
                                             <div onClick={() => setIsDropdownOpen(!isDropdownOpen)} className={`w-full pl-9 pr-8 py-2.5 text-sm rounded-lg border bg-white/90 backdrop-blur-sm border-gray-200 cursor-pointer flex items-center justify-between transition-all shadow-sm ${isDropdownOpen ? 'ring-2 ring-primary border-primary' : 'hover:border-gray-300'}`}>
                                                 <span className={username ? 'text-gray-800 font-bold truncate' : 'text-gray-500'}>{username || '-- Klik & Cari Nama --'}</span>
                                                 <Icons.ChevronDown />
@@ -515,18 +509,15 @@
                                             
                                             {isDropdownOpen && (
                                                 <>
-                                                    {/* Background layer untuk menutup dropdown saat klik di luar */}
                                                     <div className="fixed inset-0 z-40" onClick={() => setIsDropdownOpen(false)}></div>
                                                     
                                                     <div className="absolute z-50 w-full mt-1.5 bg-white border border-blue-100 rounded-xl shadow-2xl max-h-[250px] flex flex-col overflow-hidden animate-[fadeIn_0.15s_ease-out]">
-                                                        {/* Kotak Pencarian di dalam Dropdown */}
                                                         <div className="p-2 border-b border-gray-100 bg-slate-50/90 backdrop-blur-sm sticky top-0 z-10">
                                                             <div className="relative">
                                                                 <div className="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none text-gray-400"><Icons.Search /></div>
                                                                 <input type="text" autoFocus placeholder="Ketik nama..." value={searchName} onChange={e => setSearchName(e.target.value)} className="w-full pl-8 pr-3 py-2 text-xs rounded-lg border border-gray-200 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary bg-white shadow-inner" />
                                                             </div>
                                                         </div>
-                                                        {/* Daftar Nama */}
                                                         <div className="overflow-y-auto flex-1 relative z-0">
                                                             {filteredDropdownUsers.length > 0 ? filteredDropdownUsers.map(u => (
                                                                 <div key={u.id} onClick={() => {setUsername(u.nama); setIsDropdownOpen(false); setSearchName('');}} className="px-3 py-2.5 hover:bg-blue-50 cursor-pointer transition-colors text-xs font-semibold text-gray-700 border-b border-gray-50 last:border-0 hover:text-primary flex items-center gap-2.5 group">
@@ -560,7 +551,6 @@
                             {error && <div className="text-red-500 text-[10px] font-bold bg-red-50/80 backdrop-blur-sm p-1.5 rounded text-center border border-red-100">{error}</div>}
                             <button type="submit" className={`w-full py-2.5 rounded-lg text-sm font-bold text-white shadow-lg transition-transform transform hover:scale-[1.02] active:scale-[0.98] ${isAdminMode ? 'bg-indigo-600 hover:bg-indigo-700' : 'bg-primary hover:bg-primaryDark'}`}>MASUK</button>
                             
-                            {/* Tombol Install Aplikasi muncul otomatis jika browser mengizinkan */}
                             {deferredPrompt && !isAdminMode && (
                                 <button type="button" onClick={installApp} className="w-full py-2.5 rounded-lg text-sm font-bold text-blue-700 bg-blue-50 border border-blue-200 mt-2 flex items-center justify-center gap-2 hover:bg-blue-100 transition shadow-sm">
                                     <Icons.DownloadCloud /> Install Aplikasi (HP / Laptop)
@@ -615,13 +605,11 @@
 
             const [isBlurred, setIsBlurred] = useState(false);
             
-            // Dapatkan daftar periode yang tersedia untuk user ini
             const availablePeriods = useMemo(() => {
                 if(!c.riwayatGaji) return [];
                 return Object.keys(c.riwayatGaji).sort().reverse();
             }, [c]);
 
-            // Setup state periode
             const [selectedPeriod, setSelectedPeriod] = useState(() => {
                 if (availablePeriods.length > 0) return availablePeriods[0];
                 const d = new Date();
@@ -635,7 +623,6 @@
             });
             const listMonths = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
 
-            // Anti Screenshot
             useEffect(() => {
                 const handleBlur = () => setIsBlurred(true);
                 const handleFocus = () => setIsBlurred(false);
@@ -663,13 +650,10 @@
 
             const handleSelectMonth = (index) => {
                 const targetPeriod = `${tempYear}-${String(index + 1).padStart(2, '0')}`;
-                
-                // Cek ketersediaan data (Logika Warna Merah Lembut)
                 if(!availablePeriods.includes(targetPeriod)) {
                     showModal({ title: 'Data Tidak Ditemukan', message: `Slip gaji untuk bulan ${listMonths[index]} ${tempYear} belum tersedia atau Anda tidak menerima gaji pada periode ini.`, type: 'alert' });
                     return;
                 }
-                
                 setSelectedPeriod(targetPeriod);
                 setShowPeriodModal(false);
             };
@@ -724,7 +708,6 @@
                                     <img src={ICON_APP_URL} alt="App Logo" className="w-full h-full object-contain rounded-lg" onError={(e) => e.target.style.display='none'} />
                                 </div>
                                 <div className="flex flex-col justify-start">
-                                    {/* Teks Sekolah diganti dengan Gambar Logo Panjang */}
                                     <img src={LOGO_URL} alt="SDIT Al Kautsar" className="h-10 md:h-12 object-contain object-left drop-shadow-sm mb-1" />
                                     
                                     <button 
@@ -765,7 +748,6 @@
                             ) : (
                                 <>
                                     <div className="grid grid-cols-2 gap-2 md:gap-4 items-start">
-                                        {/* Box Penerimaan */}
                                         <div className="bg-white rounded-xl shadow-sm border border-green-100 p-1.5 sm:p-2 md:p-3 flex flex-col overflow-hidden">
                                             <div className="text-[9px] sm:text-[11px] md:text-sm font-bold text-green-700 mb-1 md:mb-2 border-b border-green-100 pb-1 uppercase tracking-wider bg-green-50 -mx-1.5 sm:-mx-2 md:-mx-3 px-1.5 sm:px-2 md:px-3 pt-1 md:pt-2">Penerimaan</div>
                                             <div className="flex flex-col">
@@ -782,7 +764,6 @@
                                             </div>
                                         </div>
 
-                                        {/* Box Potongan */}
                                         <div className="bg-white rounded-xl shadow-sm border border-red-100 p-1.5 sm:p-2 md:p-3 flex flex-col overflow-hidden">
                                             <div className="text-[9px] sm:text-[11px] md:text-sm font-bold text-red-700 mb-1 md:mb-2 border-b border-red-100 pb-1 uppercase tracking-wider bg-red-50 -mx-1.5 sm:-mx-2 md:-mx-3 px-1.5 sm:px-2 md:px-3 pt-1 md:pt-2">Potongan</div>
                                             <div className="flex flex-col">
@@ -879,7 +860,9 @@
             );
         };
 
-        // KOMPONEN: Template Kertas PDF Master (Native HTML Table - Anti Blank)
+        // =========================================================
+        // KOMPONEN RENDER ISI SLIP CETAK (POSISI ABSOLUTE MUTLAK)
+        // =========================================================
         const StaticPrintSlip = ({ user, periodKey, adminSettings }) => {
             const c = user;
             const parseNum = (val) => parseFloat(val?.toString().replace(/[^0-9.-]+/g,"")) || 0;
@@ -927,55 +910,60 @@
             const currentDateStr = new Intl.DateTimeFormat('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }).format(getLastWorkingDay(periodKey));
 
             return (
-                <div className="pdf-page-container">
-                    <img src={KOP_ATAS_URL} style={{ width: '100%', height: 'auto', display: 'block', margin: '0 auto' }} />
+                <div style={{ position: 'relative', width: '100%', height: '100%', backgroundColor: 'white' }}>
                     
-                    <div style={{ padding: '0 6mm' }}>
-                        <div style={{ textAlign: 'center', margin: '8px 0' }}>
-                            <span style={{ fontSize: '13px', fontWeight: '900', borderBottom: '2px solid #1e3a8a', color: '#1e3a8a', paddingBottom: '2px', textTransform: 'uppercase' }}>Slip Gaji {currentMonthStr}</span>
+                    {/* KOP ATAS (Lebar Full 100%, Tinggi Auto agar Proporsional & Tidak Gepeng) */}
+                    <div style={{ position: 'absolute', top: 0, left: 0, width: '100%' }}>
+                        <img src={KOP_ATAS_URL} style={{ width: '100%', height: 'auto', display: 'block' }} />
+                    </div>
+                    
+                    {/* KONTEN TENGAH (Dipaku di tengah dengan padding aman agar tidak menyentuh Kop) */}
+                    <div style={{ position: 'absolute', top: '27mm', left: 0, width: '100%', height: '171mm', padding: '0 6mm', boxSizing: 'border-box', overflow: 'hidden' }}>
+                        
+                        <div style={{ textAlign: 'center', marginBottom: '8px' }}>
+                            <span style={{ fontSize: '12px', fontWeight: '900', borderBottom: '1.5px solid #1e3a8a', color: '#1e3a8a', paddingBottom: '1px', textTransform: 'uppercase' }}>Slip Gaji {currentMonthStr}</span>
                         </div>
                         
-                        {/* Header Info - Presisi Mantap */}
-                        <table className="native-table" style={{ backgroundColor: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '8px', fontSize: '9px', marginBottom: '8px' }}>
+                        {/* Header Info - Font sedikit dibesarkan */}
+                        <table className="native-table" style={{ backgroundColor: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '6px', fontSize: '9.5px', marginBottom: '6px' }}>
                             <tbody>
                                 <tr>
-                                    <td style={{ padding: '5px 4px 2px 8px', width: '15%', fontWeight: 'bold', color: '#1e40af' }}>Diberikan Kepada</td>
-                                    <td style={{ padding: '5px 4px 2px 0', width: '2%' }}>:</td>
-                                    <td style={{ padding: '5px 4px 2px 0', width: '33%', fontWeight: '900', fontSize: '10.5px' }}>{c.nama}</td>
-                                    <td style={{ padding: '5px 4px 2px 8px', width: '15%', fontWeight: 'bold', color: '#1e40af' }}>Lama Bekerja</td>
-                                    <td style={{ padding: '5px 4px 2px 0', width: '2%' }}>:</td>
-                                    <td style={{ padding: '5px 4px 2px 0', width: '33%', fontWeight: 'bold' }}>{c.lamaBekerja || '-'}</td>
+                                    <td style={{ padding: '4px 4px 1px 6px', width: '15%', fontWeight: 'bold', color: '#1e40af' }}>Diberikan Kepada</td>
+                                    <td style={{ padding: '4px 4px 1px 0', width: '2%' }}>:</td>
+                                    <td style={{ padding: '4px 4px 1px 0', width: '33%', fontWeight: '900', fontSize: '10.5px' }}>{c.nama}</td>
+                                    <td style={{ padding: '4px 4px 1px 6px', width: '15%', fontWeight: 'bold', color: '#1e40af' }}>Lama Bekerja</td>
+                                    <td style={{ padding: '4px 4px 1px 0', width: '2%' }}>:</td>
+                                    <td style={{ padding: '4px 4px 1px 0', width: '33%', fontWeight: 'bold' }}>{c.lamaBekerja || '-'}</td>
                                 </tr>
                                 <tr>
-                                    <td style={{ padding: '2px 4px 5px 8px', fontWeight: 'bold', color: '#1e40af' }}>Status / TMT</td>
-                                    <td style={{ padding: '2px 4px 5px 0' }}>:</td>
-                                    <td style={{ padding: '2px 4px 5px 0', fontWeight: 'bold' }}>{c.status} ({formatTglIndo(c.tmt)})</td>
-                                    <td style={{ padding: '2px 4px 5px 8px', fontWeight: 'bold', color: '#1e40af' }}>Tugas Tambahan</td>
-                                    <td style={{ padding: '2px 4px 5px 0' }}>:</td>
-                                    <td style={{ padding: '2px 4px 5px 0', fontWeight: 'bold' }}>{c.tugasTambahan || '-'}</td>
+                                    <td style={{ padding: '1px 4px 4px 6px', fontWeight: 'bold', color: '#1e40af' }}>Status / TMT</td>
+                                    <td style={{ padding: '1px 4px 4px 0' }}>:</td>
+                                    <td style={{ padding: '1px 4px 4px 0', fontWeight: 'bold' }}>{c.status} ({formatTglIndo(c.tmt)})</td>
+                                    <td style={{ padding: '1px 4px 4px 6px', fontWeight: 'bold', color: '#1e40af' }}>Tugas Tambahan</td>
+                                    <td style={{ padding: '1px 4px 4px 0' }}>:</td>
+                                    <td style={{ padding: '1px 4px 4px 0', fontWeight: 'bold' }}>{c.tugasTambahan || '-'}</td>
                                 </tr>
                             </tbody>
                         </table>
 
-                        {/* Tabel Penerimaan & Potongan - Ukuran Emas */}
-                        <table className="native-table" style={{ marginBottom: '8px' }}>
+                        {/* Tabel Rincian - Font membesar jadi 8.5px dan padding direnggangkan */}
+                        <table className="native-table" style={{ marginBottom: '6px' }}>
                             <tbody>
                                 <tr>
-                                    {/* Kolom Penerimaan */}
-                                    <td style={{ width: '48.5%', border: '1px solid #86efac', borderRadius: '8px', padding: 0 }}>
-                                        <div style={{ backgroundColor: '#dcfce7', color: '#14532d', fontWeight: '900', textAlign: 'center', padding: '5px', fontSize: '9.5px', borderBottom: '1px solid #86efac', borderTopLeftRadius: '7px', borderTopRightRadius: '7px' }}>PENERIMAAN</div>
+                                    <td style={{ width: '48.5%', border: '1px solid #86efac', borderRadius: '6px', padding: 0 }}>
+                                        <div style={{ backgroundColor: '#dcfce7', color: '#14532d', fontWeight: '900', textAlign: 'center', padding: '4px', fontSize: '9.5px', borderBottom: '1px solid #86efac', borderTopLeftRadius: '5px', borderTopRightRadius: '5px' }}>PENERIMAAN</div>
                                         <table style={{ width: '100%', fontSize: '8.5px', borderCollapse: 'collapse' }}>
                                             <tbody>
                                                 {penerimaan.map((item, idx) => (
                                                     <tr key={idx} style={{ backgroundColor: idx % 2 === 0 ? '#f0fdf4' : '#ffffff' }}>
-                                                        <td style={{ padding: '4px 8px', color: '#14532d', borderBottom: '1px solid #dcfce7' }}>{item.label}</td>
-                                                        <td style={{ padding: '4px 8px', textAlign: 'right', fontWeight: 'bold', color: '#166534', borderBottom: '1px solid #dcfce7', whiteSpace: 'nowrap' }}>{item.val === 0 ? '-' : formatRpPlain(item.val)}</td>
+                                                        <td style={{ padding: '3px 6px', color: '#14532d', borderBottom: '1px solid #dcfce7' }}>{item.label}</td>
+                                                        <td style={{ padding: '3px 6px', textAlign: 'right', fontWeight: 'bold', color: '#166534', borderBottom: '1px solid #dcfce7', whiteSpace: 'nowrap' }}>{item.val === 0 ? '-' : formatRpPlain(item.val)}</td>
                                                     </tr>
                                                 ))}
                                             </tbody>
                                         </table>
-                                        <div style={{ backgroundColor: '#bbf7d0', padding: '5px 8px', fontSize: '9.5px', borderTop: '1px solid #86efac', borderBottomLeftRadius: '7px', borderBottomRightRadius: '7px' }}>
-                                            <span style={{ fontWeight: '900', color: '#14532d', float: 'left' }}>TOTAL PENERIMAAN</span>
+                                        <div style={{ backgroundColor: '#bbf7d0', padding: '4px 6px', fontSize: '9.5px', borderTop: '1px solid #86efac', borderBottomLeftRadius: '5px', borderBottomRightRadius: '5px' }}>
+                                            <span style={{ fontWeight: '900', color: '#14532d', float: 'left' }}>TOTAL</span>
                                             <span style={{ fontWeight: '900', color: '#14532d', float: 'right' }}>{formatRpPlain(totalPenerimaan)}</span>
                                             <div style={{ clear: 'both' }}></div>
                                         </div>
@@ -983,27 +971,26 @@
                                     
                                     <td style={{ width: '3%' }}></td>
                                     
-                                    {/* Kolom Potongan */}
-                                    <td style={{ width: '48.5%', border: '1px solid #fca5a5', borderRadius: '8px', padding: 0 }}>
-                                        <div style={{ backgroundColor: '#fee2e2', color: '#7f1d1d', fontWeight: '900', textAlign: 'center', padding: '5px', fontSize: '9.5px', borderBottom: '1px solid #fca5a5', borderTopLeftRadius: '7px', borderTopRightRadius: '7px' }}>POTONGAN</div>
+                                    <td style={{ width: '48.5%', border: '1px solid #fca5a5', borderRadius: '6px', padding: 0 }}>
+                                        <div style={{ backgroundColor: '#fee2e2', color: '#7f1d1d', fontWeight: '900', textAlign: 'center', padding: '4px', fontSize: '9.5px', borderBottom: '1px solid #fca5a5', borderTopLeftRadius: '5px', borderTopRightRadius: '5px' }}>POTONGAN</div>
                                         <table style={{ width: '100%', fontSize: '8.5px', borderCollapse: 'collapse' }}>
                                             <tbody>
                                                 {potongan.map((item, idx) => (
                                                     <tr key={idx} style={{ backgroundColor: idx % 2 === 0 ? '#fef2f2' : '#ffffff' }}>
-                                                        <td style={{ padding: '4px 8px', color: '#7f1d1d', borderBottom: '1px solid #fee2e2' }}>{item.label}</td>
-                                                        <td style={{ padding: '4px 8px', textAlign: 'right', fontWeight: 'bold', color: '#991b1b', borderBottom: '1px solid #fee2e2', whiteSpace: 'nowrap' }}>{item.val === 0 ? '-' : formatRpPlain(item.val)}</td>
+                                                        <td style={{ padding: '3px 6px', color: '#7f1d1d', borderBottom: '1px solid #fee2e2' }}>{item.label}</td>
+                                                        <td style={{ padding: '3px 6px', textAlign: 'right', fontWeight: 'bold', color: '#991b1b', borderBottom: '1px solid #fee2e2', whiteSpace: 'nowrap' }}>{item.val === 0 ? '-' : formatRpPlain(item.val)}</td>
                                                     </tr>
                                                 ))}
                                                 {[...Array(Math.max(0, penerimaan.length - potongan.length))].map((_, idx) => (
                                                     <tr key={`empty-${idx}`} style={{ backgroundColor: (potongan.length + idx) % 2 === 0 ? '#fef2f2' : '#ffffff' }}>
-                                                        <td style={{ padding: '4px 8px', borderBottom: '1px solid #fee2e2' }}>&nbsp;</td>
-                                                        <td style={{ padding: '4px 8px', borderBottom: '1px solid #fee2e2' }}>&nbsp;</td>
+                                                        <td style={{ padding: '3px 6px', borderBottom: '1px solid #fee2e2' }}>&nbsp;</td>
+                                                        <td style={{ padding: '3px 6px', borderBottom: '1px solid #fee2e2' }}>&nbsp;</td>
                                                     </tr>
                                                 ))}
                                             </tbody>
                                         </table>
-                                        <div style={{ backgroundColor: '#fecaca', padding: '5px 8px', fontSize: '9.5px', borderTop: '1px solid #fca5a5', borderBottomLeftRadius: '7px', borderBottomRightRadius: '7px' }}>
-                                            <span style={{ fontWeight: '900', color: '#7f1d1d', float: 'left' }}>TOTAL POTONGAN</span>
+                                        <div style={{ backgroundColor: '#fecaca', padding: '4px 6px', fontSize: '9.5px', borderTop: '1px solid #fca5a5', borderBottomLeftRadius: '5px', borderBottomRightRadius: '5px' }}>
+                                            <span style={{ fontWeight: '900', color: '#7f1d1d', float: 'left' }}>TOTAL</span>
                                             <span style={{ fontWeight: '900', color: '#7f1d1d', float: 'right' }}>{formatRpPlain(totalPotongan)}</span>
                                             <div style={{ clear: 'both' }}></div>
                                         </div>
@@ -1012,35 +999,31 @@
                             </tbody>
                         </table>
 
-                        {/* Total Bersih */}
-                        <div style={{ background: 'linear-gradient(to right, #fb923c, #ea580c)', padding: '8px 12px', borderRadius: '8px', color: 'white', marginBottom: '10px' }}>
-                            <span style={{ fontWeight: '900', fontSize: '11px', textTransform: 'uppercase', float: 'left', marginTop: '2px' }}>Total Diterima Bersih</span>
-                            <span style={{ fontWeight: '900', fontSize: '15px', float: 'right', textShadow: '1px 1px 2px rgba(0,0,0,0.2)' }}>Rp {formatRpPlain(gajiBersih)}</span>
+                        <div style={{ background: 'linear-gradient(to right, #fb923c, #ea580c)', padding: '7px 10px', borderRadius: '6px', color: 'white', marginBottom: '6px' }}>
+                            <span style={{ fontWeight: '900', fontSize: '11px', textTransform: 'uppercase', float: 'left', marginTop: '1px' }}>Total Diterima Bersih</span>
+                            <span style={{ fontWeight: '900', fontSize: '16px', float: 'right', textShadow: '1px 1px 2px rgba(0,0,0,0.2)' }}>Rp {formatRpPlain(gajiBersih)}</span>
                             <div style={{ clear: 'both' }}></div>
                         </div>
 
-                        {/* Catatan & Tanda Tangan */}
                         <table className="native-table">
                             <tbody>
                                 <tr>
-                                    <td style={{ width: '68%', verticalAlign: 'bottom' }}>
-                                        <div style={{ backgroundColor: '#eff6ff', border: '1px solid #bfdbfe', padding: '8px', borderRadius: '8px', fontSize: '8px', color: '#1e3a8a', lineHeight: '1.3' }}>
+                                    <td style={{ width: '68%', verticalAlign: 'top' }}>
+                                        <div style={{ backgroundColor: '#eff6ff', border: '1px solid #bfdbfe', padding: '5px', borderRadius: '6px', fontSize: '8px', color: '#1e3a8a', lineHeight: '1.2' }}>
                                             <strong style={{ textDecoration: 'underline', fontSize: '8.5px' }}>Catatan Penting:</strong>
-                                            
-                                            {/* Angka Catatan Muncul & Teks Disesuaikan */}
-                                            <ol style={{ paddingLeft: '16px', margin: '4px 0 0 0', textAlign: 'justify', paddingRight: '4px', listStyleType: 'decimal' }}>
-                                                <li style={{ marginBottom: '2px' }}>Tabungan hari tua (DPLK) disetorkan ke Bank Muamalat, kepesertaan ketika sudah 4 tahun Menjadi Guru/Karyawan Tetap.</li>
-                                                <li style={{ marginBottom: '2px' }}>Dana Sosial ditarik setiap bulan sebesar Rp 15.000,- (lima belas ribu rupiah) untuk kegiatan sosial di SDIT Muhammadiyah Al-Kautsar.</li>
-                                                <li style={{ marginBottom: '2px' }}>Potongan BPJS Kesehatan diberlakukan bagi yang menambahkan peserta tambahan (orang tua/mertua).</li>
+                                            <ol style={{ paddingLeft: '14px', margin: '2px 0 0 0', textAlign: 'justify', paddingRight: '4px', listStyleType: 'decimal' }}>
+                                                <li style={{ marginBottom: '1px' }}>Tabungan hari tua (DPLK) disetorkan ke Bank Muamalat, kepesertaan ketika sudah 4 tahun Menjadi Guru/Karyawan Tetap.</li>
+                                                <li style={{ marginBottom: '1px' }}>Dana Sosial ditarik setiap bulan sebesar Rp 15.000,- untuk kegiatan sosial di SDIT Muhammadiyah Al-Kautsar.</li>
+                                                <li style={{ marginBottom: '1px' }}>Potongan BPJS Kesehatan diberlakukan bagi yang menambahkan peserta tambahan (orang tua/mertua).</li>
                                                 <li>BPJS Ketenagakerjaan mencakup 4 program, namun yang ditanggung oleh sekolah hanya 3 program (JKK, JKM, JHT).</li>
                                             </ol>
                                         </div>
                                     </td>
                                     <td style={{ width: '4%' }}></td>
-                                    <td style={{ width: '28%', verticalAlign: 'bottom', textAlign: 'center', fontSize: '9px', color: '#334155' }}>
-                                        <p style={{ margin: '0 0 4px 0' }}>Kartasura, {currentDateStr}</p>
-                                        <p style={{ margin: '0 0 4px 0' }}>Bendahara,</p>
-                                        <div style={{ height: '48px', width: '100%', position: 'relative' }}>
+                                    <td style={{ width: '28%', verticalAlign: 'top', textAlign: 'center', fontSize: '9px', color: '#334155' }}>
+                                        <p style={{ margin: '0 0 2px 0' }}>Kartasura, {currentDateStr}</p>
+                                        <p style={{ margin: '0 0 2px 0' }}>Bendahara,</p>
+                                        <div style={{ height: '38px', width: '100%', position: 'relative' }}>
                                             <img src={TTD_URL} style={{ height: '100%', width: '100%', objectFit: 'contain', mixBlendMode: 'multiply', position: 'absolute', top: 0, left: 0 }} />
                                         </div>
                                         <p style={{ margin: 0, fontWeight: 'bold', textDecoration: 'underline' }}>Nur Marlena, S. Kom</p>
@@ -1050,8 +1033,10 @@
                         </table>
                     </div>
 
-                    {/* KOP Bawah Kembali Muncul! (z-index dihapus) */}
-                    <img src={KOP_BAWAH_URL} style={{ width: '100%', height: 'auto', position: 'absolute', bottom: 0, left: 0, display: 'block' }} />
+                    {/* KOP BAWAH (Lebar Full 100%, Tinggi Auto agar Proporsional & Tidak Gepeng) */}
+                    <div style={{ position: 'absolute', bottom: 0, left: 0, width: '100%' }}>
+                        <img src={KOP_BAWAH_URL} style={{ width: '100%', height: 'auto', display: 'block' }} />
+                    </div>
                 </div>
             );
         };
